@@ -14,7 +14,7 @@ public class TerrainGeneratorScript : MonoBehaviour
   public int MAX_ADD_HEIGHT = 2, MAX_SUBTRACT_HEIGHT = -5;
   public float step = 1.0f;
   private int maxDimension, minDimension;
-  Dictionary<(int, int), float> heightMap = new Dictionary<(int, int), float>();
+  Dictionary<(int, int), Vector3> heightMap = new Dictionary<(int, int), Vector3>();
   private System.Random rand;
   // Start is called before the first frame update
   void Start()
@@ -29,14 +29,14 @@ public class TerrainGeneratorScript : MonoBehaviour
     this.GenerateVertices();
     mesh.vertices = vertices;
     // mesh.uv = newUV;
-    triangles = new int[mesh.vertices.Length];
-    colors = new Color[mesh.vertices.Length];
+    this.triangles = new int[mesh.vertices.Length];
+    this.colors = new Color[mesh.vertices.Length];
 
     for (int i = 0; i < mesh.vertices.Length; i++)
     {
-      if (mesh.vertices[i].y > 0.7 * MAX_HEIGHT)
+      if (mesh.vertices[i].y > 0.5 * MAX_HEIGHT)
         colors[i] = Color.white;
-      else if (mesh.vertices[i].y > 0.4 * MAX_HEIGHT)
+      else if (mesh.vertices[i].y > 0.2 * MAX_HEIGHT)
         colors[i] = Color.green;
       else
         colors[i] = Color.blue;
@@ -61,7 +61,7 @@ public class TerrainGeneratorScript : MonoBehaviour
         (int, int)[] order = new (int, int)[] { pivot, top, diagonal, pivot, diagonal, right };
         foreach ((int vx, int vy) o in order)
         {
-          verticesList.Add(new Vector3((float)o.vx, this.getHeight(o.vx, o.vy), (float)o.vy));
+          verticesList.Add(this.getHeight(o.vx, o.vy));
         }
       }
     }
@@ -81,7 +81,7 @@ public class TerrainGeneratorScript : MonoBehaviour
 
   void PrintHeights()
   {
-    float value;
+    Vector3 value;
     StringBuilder sb = new StringBuilder();
     for (int i = minDimension; i < maxDimension - 1; i++)
     {
@@ -89,7 +89,7 @@ public class TerrainGeneratorScript : MonoBehaviour
       {
         if (this.heightMap.TryGetValue((i, j), out value))
         {
-          sb.AppendFormat("{0,-10:0.##}", value);
+          sb.AppendFormat("{0,-10:0.##}", value.y);
         }
         else
         {
@@ -144,30 +144,13 @@ public class TerrainGeneratorScript : MonoBehaviour
 
       toCalculateNextDiamondCoordinates.Enqueue(coordinate);
 
-      if (this.IsWithinMap(x - reach, y - reach))
-      {
-        curSum += this.getHeight(x - reach, y - reach);
-        numOfCorners++;
+      (int, int)[] coordinates = this.getDiamondPattern(x, y, reach);
+      foreach((int diamondX, int diamondY) c in coordinates) {
+        if (this.IsWithinMap(c.diamondX, c.diamondY)){
+          curSum += this.getHeight(c.diamondX, c.diamondY).y;
+          numOfCorners++;
+        }
       }
-
-      if (this.IsWithinMap(x + reach, y - reach))
-      {
-        curSum += this.getHeight(x + reach, y - reach);
-        numOfCorners++;
-      }
-
-      if (this.IsWithinMap(x - reach, y + reach))
-      {
-        curSum += this.getHeight(x - reach, y + reach);
-        numOfCorners++;
-      }
-
-      if (this.IsWithinMap(x + reach, y + reach))
-      {
-        curSum += this.getHeight(x + reach, y + reach);
-        numOfCorners++;
-      }
-
       this.assignHeight(x, y, this.generateHeight(curSum / numOfCorners));
       this.addSquareCoordinates(x, y, reach, ref squareCoordinates);
     }
@@ -175,7 +158,7 @@ public class TerrainGeneratorScript : MonoBehaviour
     while (toCalculateNextDiamondCoordinates.Count != 0)
     {
       var coordinate = toCalculateNextDiamondCoordinates.Dequeue();
-      this.addDiamondCoordinates(coordinate.Item1, coordinate.Item2, reach, ref diamondCoordinates);
+      this.addDiamondCoordinates(coordinate.Item1, coordinate.Item2, reach/2, ref diamondCoordinates);
     }
   }
   void SquareStep(int reach, ref Stack<(int, int)> squareCoordinates)
@@ -189,28 +172,12 @@ public class TerrainGeneratorScript : MonoBehaviour
       int y = coordinate.Item2;
       if (this.containsCoordinate(x, y)) continue;
 
-      if (this.IsWithinMap(x - reach, y))
-      {
-        curSum += this.getHeight(x - reach, y);
-        numOfCorners++;
-      }
-
-      if (this.IsWithinMap(x + reach, y))
-      {
-        curSum += this.getHeight(x + reach, y);
-        numOfCorners++;
-      }
-
-      if (this.IsWithinMap(x, y + reach))
-      {
-        curSum += this.getHeight(x, y + reach);
-        numOfCorners++;
-      }
-
-      if (this.IsWithinMap(x, y - reach))
-      {
-        curSum += this.getHeight(x, y - reach);
-        numOfCorners++;
+      (int, int)[] coordinates = this.getSquarePattern(x, y, reach);
+      foreach((int squareX, int squareY) c in coordinates) {
+        if (this.IsWithinMap(c.squareX, c.squareY)){
+          curSum += this.getHeight(c.squareX, c.squareY).y;
+          numOfCorners++;
+        }
       }
 
       this.assignHeight(x, y, this.generateHeight(curSum / numOfCorners));
@@ -218,53 +185,34 @@ public class TerrainGeneratorScript : MonoBehaviour
 
   }
 
-  void addDiamondCoordinates(int x, int y, int currentReach, ref Stack<(int, int)> diamondCoordinates)
+  void addDiamondCoordinates(int x, int y, int reach, ref Stack<(int, int)> diamondCoordinates)
   {
-    int reach = currentReach / 2;
+    (int, int)[] coordinates = this.getDiamondPattern(x, y, reach);
 
-    if (this.IsWithinMap(x - reach, y - reach) && !this.containsCoordinate(x - reach, y - reach))
-    {
-      diamondCoordinates.Push((x - reach, y - reach));
-    }
-
-    if (this.IsWithinMap(x + reach, y - reach) && !this.containsCoordinate(x + reach, y - reach))
-    {
-      diamondCoordinates.Push((x + reach, y - reach));
-    }
-
-    if (this.IsWithinMap(x - reach, y + reach) && !this.containsCoordinate(x - reach, y + reach))
-    {
-      diamondCoordinates.Push((x - reach, y + reach));
-    }
-
-    if (this.IsWithinMap(x + reach, y + reach) && !this.containsCoordinate(x - reach, y - reach))
-    {
-      diamondCoordinates.Push((x + reach, y + reach));
+    foreach ((int diamondX, int diamondY) c in coordinates){
+      if (this.IsWithinMap(c.diamondX, c.diamondY) && !this.containsCoordinate(c.diamondX, c.diamondY))
+        diamondCoordinates.Push(c);
     }
   }
 
   void addSquareCoordinates(int x, int y, int reach, ref Stack<(int, int)> squareCoordinates)
   {
-    if (this.IsWithinMap(x - reach, y) && !this.containsCoordinate(x - reach, y))
-    {
-      squareCoordinates.Push((x - reach, y));
-    }
+    (int, int)[] coordinates = this.getSquarePattern(x, y, reach);
 
-    if (this.IsWithinMap(x + reach, y) && !this.containsCoordinate(x + reach, y))
-    {
-      squareCoordinates.Push((x + reach, y));
-    }
-
-    if (this.IsWithinMap(x, y + reach) && !this.containsCoordinate(x, y + reach))
-    {
-      squareCoordinates.Push((x, y + reach));
-    }
-
-    if (this.IsWithinMap(x, y - reach) && !this.containsCoordinate(x, y - reach))
-    {
-      squareCoordinates.Push((x, y - reach));
+    foreach ((int squareX, int squareY) c in coordinates){
+      if (this.IsWithinMap(c.squareX, c.squareY) && !this.containsCoordinate(c.squareX, c.squareY))
+        squareCoordinates.Push(c);
     }
   }
+
+  (int, int)[] getDiamondPattern(int x, int y, int reach) {
+    return  new (int, int)[]{(x - reach, y - reach), (x + reach, y - reach), (x - reach, y + reach), (x + reach, y + reach)};
+  }
+  
+  (int, int)[] getSquarePattern(int x, int y, int reach) {
+    return  new (int, int)[]{(x - reach, y), (x + reach, y), (x, y + reach), (x, y - reach)};
+  }
+
   void CornerGenerator()
   {
     this.assignHeight(minDimension, minDimension, this.GenerateRandom());
@@ -290,13 +238,13 @@ public class TerrainGeneratorScript : MonoBehaviour
     {
       return false;
     }
-    this.heightMap.Add((x, y), value);
+    this.heightMap.Add((x, y), new Vector3(x, value, y));
     return true;
   }
 
-  float getHeight(int x, int y)
+  Vector3 getHeight(int x, int y)
   {
-    float output;
+    Vector3 output;
     if (!this.heightMap.TryGetValue((x, y), out output))
       throw new System.InvalidOperationException("Accessing a coordinate that has not been assigned a height");
     return output;
