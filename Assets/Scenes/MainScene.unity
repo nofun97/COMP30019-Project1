@@ -236,8 +236,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   MAX_HEIGHT: 50
-  MIN_HEIGHT: 1
-  dimension: 17
+  MIN_HEIGHT: -30
+  dimension: 65
   MAX_ADD_HEIGHT: 2
   MAX_SUBTRACT_HEIGHT: -5
   step: 1
@@ -272,7 +272,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: b23f2ae7d88d1e9498fc1b81b4f4095a, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
