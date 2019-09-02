@@ -116,101 +116,74 @@ public class TerrainGeneratorScript : MonoBehaviour
   }
   void DiamondSquare()
   {
-    Stack<(int, int)> diamondCoordinates = new Stack<(int, int)>();
-    Stack<(int, int)> squareCoordinates = new Stack<(int, int)>();
-    diamondCoordinates.Push((0, 0));
     int reach = maxDimension - 1;
-    while (diamondCoordinates.Count != 0 || squareCoordinates.Count != 0)
+    int offset = reach;
+    for (int size = dimension - 1; size > 1; size /= 2)
     {
-      this.DiamondStep(reach, ref diamondCoordinates, ref squareCoordinates);
-      this.SquareStep(reach, ref squareCoordinates);
+      this.diamondStep(reach, size, offset);
+      this.squareStep(reach, size, offset);
       reach /= 2;
     }
   }
 
-  void DiamondStep(int reach, ref Stack<(int, int)> diamondCoordinates, ref Stack<(int, int)> squareCoordinates)
+  void diamondStep(int reach, int size, int offset)
   {
-
-    Queue<(int, int)> toCalculateNextDiamondCoordinates = new Queue<(int, int)>();
-
-    while (diamondCoordinates.Count != 0)
+    int start = reach - offset;
+    for (int y = start; y < maxDimension; y += size)
     {
-      float curSum = 0.0f;
-      int numOfCorners = 0;
-      var coordinate = diamondCoordinates.Pop();
-      int x = coordinate.Item1;
-      int y = coordinate.Item2;
-      if (this.containsCoordinate(x, y)) continue;
+      for (int x = start; x < maxDimension; x += size)
+      {
+        float curSum = 0.0f;
+        int numOfCorners = 0;
+        (int, int)[] coordinates = this.getDiamondPattern(x, y, reach);
+        foreach ((int diamondX, int diamondY) c in coordinates)
+        {
+          if (this.IsWithinMap(c.diamondX, c.diamondY))
+          {
 
-      toCalculateNextDiamondCoordinates.Enqueue(coordinate);
-
-      (int, int)[] coordinates = this.getDiamondPattern(x, y, reach);
-      foreach((int diamondX, int diamondY) c in coordinates) {
-        if (this.IsWithinMap(c.diamondX, c.diamondY)){
-          curSum += this.getHeight(c.diamondX, c.diamondY).y;
-          numOfCorners++;
+            curSum += this.getHeight(c.diamondX, c.diamondY).y;
+            numOfCorners++;
+          }
         }
+        this.assignHeight(y, x, this.generateHeight(curSum / numOfCorners));
       }
-      this.assignHeight(x, y, this.generateHeight(curSum / numOfCorners));
-      this.addSquareCoordinates(x, y, reach, ref squareCoordinates);
-    }
-
-    while (toCalculateNextDiamondCoordinates.Count != 0)
-    {
-      var coordinate = toCalculateNextDiamondCoordinates.Dequeue();
-      this.addDiamondCoordinates(coordinate.Item1, coordinate.Item2, reach/2, ref diamondCoordinates);
     }
   }
-  void SquareStep(int reach, ref Stack<(int, int)> squareCoordinates)
-  {
-    while (squareCoordinates.Count != 0)
-    {
-      float curSum = 0.0f;
-      int numOfCorners = 0;
-      var coordinate = squareCoordinates.Pop();
-      int x = coordinate.Item1;
-      int y = coordinate.Item2;
-      if (this.containsCoordinate(x, y)) continue;
 
-      (int, int)[] coordinates = this.getSquarePattern(x, y, reach);
-      foreach((int squareX, int squareY) c in coordinates) {
-        if (this.IsWithinMap(c.squareX, c.squareY)){
-          curSum += this.getHeight(c.squareX, c.squareY).y;
-          numOfCorners++;
+  void squareStep(int reach, int size, int offset)
+  {
+    Boolean even = true;
+    for (int y = minDimension; y < maxDimension; y += reach)
+    {
+      for (int x = (even ? reach : 0) - offset; x < maxDimension; x += size)
+      {
+        float curSum = 0.0f;
+        int numOfCorners = 0;
+        (int, int)[] coordinates = this.getSquarePattern(x, y, reach);
+        foreach ((int squareX, int squareY) c in coordinates)
+        {
+          if (this.IsWithinMap(c.squareX, c.squareY))
+          {
+
+            curSum += this.getHeight(c.squareX, c.squareY).y;
+            numOfCorners++;
+          }
         }
+        Debug.Log(String.Format("Assigning ({0}, {1}), size: {2}, reach: {3}", x, y, size, reach));
+        this.assignHeight(y, x, this.generateHeight(curSum / numOfCorners));
       }
-
-      this.assignHeight(x, y, this.generateHeight(curSum / numOfCorners));
+      even = !even;
     }
-
   }
 
-  void addDiamondCoordinates(int x, int y, int reach, ref Stack<(int, int)> diamondCoordinates)
+  (int, int)[] getDiamondPattern(int x, int y, int reach)
   {
-    (int, int)[] coordinates = this.getDiamondPattern(x, y, reach);
-
-    foreach ((int diamondX, int diamondY) c in coordinates){
-      if (this.IsWithinMap(c.diamondX, c.diamondY) && !this.containsCoordinate(c.diamondX, c.diamondY))
-        diamondCoordinates.Push(c);
-    }
+    return new (int, int)[] { (x - reach, y - reach), (x + reach, y - reach), (x - reach, y + reach), (x + reach, y + reach) };
   }
 
-  void addSquareCoordinates(int x, int y, int reach, ref Stack<(int, int)> squareCoordinates)
+  (int, int)[] getSquarePattern(int x, int y, int reach)
   {
-    (int, int)[] coordinates = this.getSquarePattern(x, y, reach);
-
-    foreach ((int squareX, int squareY) c in coordinates){
-      if (this.IsWithinMap(c.squareX, c.squareY) && !this.containsCoordinate(c.squareX, c.squareY))
-        squareCoordinates.Push(c);
-    }
-  }
-
-  (int, int)[] getDiamondPattern(int x, int y, int reach) {
-    return  new (int, int)[]{(x - reach, y - reach), (x + reach, y - reach), (x - reach, y + reach), (x + reach, y + reach)};
-  }
-  
-  (int, int)[] getSquarePattern(int x, int y, int reach) {
-    return  new (int, int)[]{(x - reach, y), (x + reach, y), (x, y + reach), (x, y - reach)};
+    return new (int, int)[] { (x - reach, y), (x + reach, y), (x, y + reach), (x, y - reach) };
   }
 
   void CornerGenerator()
