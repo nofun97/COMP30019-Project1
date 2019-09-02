@@ -131,6 +131,7 @@ GameObject:
   - component: {fileID: 51454524}
   - component: {fileID: 51454523}
   - component: {fileID: 51454522}
+  - component: {fileID: 51454525}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -203,6 +204,21 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &51454525
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 51454521}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0fd33b90807d544468c80b3390e46913, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cameraSpeed: 2
+  yawSpeed: 500
+  pitchSpeed: 500
 --- !u!1 &117153328
 GameObject:
   m_ObjectHideFlags: 0
@@ -235,12 +251,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f31fd7b33d9f04b63affabb4bb572adc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MAX_HEIGHT: 50
+  MAX_HEIGHT: 100
   MIN_HEIGHT: -30
   dimension: 65
   MAX_ADD_HEIGHT: 2
-  MAX_SUBTRACT_HEIGHT: -5
-  step: 1
+  MAX_SUBTRACT_HEIGHT: -2
+  roughness: 1
 --- !u!64 &117153330
 MeshCollider:
   m_ObjectHideFlags: 0

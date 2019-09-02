@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using System;
 using System.Text;
@@ -10,11 +9,15 @@ public class TerrainGeneratorScript : MonoBehaviour
   private int[] triangles;
 
   private Color[] colors;
-  public int MAX_HEIGHT = 50, MIN_HEIGHT = -30, dimension = 5;
+  // public int MAX_HEIGHT = 50, MIN_HEIGHT = -30,
+  public int dimension = 5;
   public int MAX_ADD_HEIGHT = 2, MAX_SUBTRACT_HEIGHT = -5;
+  public float roughness = 0.5f;
+  public int SpikeRandomness = 10;
+  public float range = 0.5f;
   private int maxDimension, minDimension, OFFSET;
   private float highestPeak;
-  Vector3[][] heightMap;
+  Vector3[][] vectorArray;
   private System.Random rand;
   // Start is called before the first frame update
   void Start()
@@ -28,7 +31,6 @@ public class TerrainGeneratorScript : MonoBehaviour
     Mesh mesh = GetComponent<MeshFilter>().mesh;
     this.GenerateVertices();
     mesh.vertices = vertices;
-    // mesh.uv = newUV;
     this.triangles = new int[mesh.vertices.Length];
     this.colors = new Color[mesh.vertices.Length];
 
@@ -74,11 +76,12 @@ public class TerrainGeneratorScript : MonoBehaviour
     this.maxDimension = (int)(dimension / 2) + 1;
     this.minDimension = (int)(-dimension / 2);
     this.OFFSET = maxDimension - 1;
-    this.highestPeak = MIN_HEIGHT;
-    this.heightMap = new Vector3[dimension][];
+    this.highestPeak = -1;
+    this.vectorArray = new Vector3[dimension][];
     for (int i = 0; i < dimension; i++)
-      this.heightMap[i] = new Vector3[dimension];
-    rand = new System.Random();
+      this.vectorArray[i] = new Vector3[dimension];
+    // UnityEngine.Random.InitState((int) Random.value)
+    this.rand = new System.Random();
     this.CornerGenerator();
     // this.PrintHeights();
     this.DiamondSquare();
@@ -92,7 +95,7 @@ public class TerrainGeneratorScript : MonoBehaviour
     {
       for (int j = 0; j < dimension; j++)
       {
-        sb.AppendFormat("{0,-10:0.##}", this.heightMap[j][i].y);
+        sb.AppendFormat("{0,-10:0.##}", this.vectorArray[j][i].y);
       }
       sb.AppendLine();
     }
@@ -101,16 +104,16 @@ public class TerrainGeneratorScript : MonoBehaviour
 
   float generateHeight(float baseHeight)
   {
-    float height = baseHeight + this.rand.Next(MAX_SUBTRACT_HEIGHT, MAX_ADD_HEIGHT);
-    if (height > MAX_HEIGHT)
-    {
-      height = MAX_HEIGHT;
-    }
-    else if (height < MIN_HEIGHT)
-    {
-      height = MIN_HEIGHT;
-    }
-    return height;
+    //TODO: Add credit to this equation
+    // baseHeight += ((UnityEngine.Random.value * range * 2.0f) - range) + (rand.Next(MAX_SUBTRACT_HEIGHT, MAX_ADD_HEIGHT) * UnityEngine.Random.value);
+    // baseHeight += UnityEngine.Random.value * range * 2.0f - range;
+    // baseHeight += (UnityEngine.Random.value + rand.Next(MAX_SUBTRACT_HEIGHT, MAX_ADD_HEIGHT)) * range * 2.0f - range;
+    // baseHeight += UnityEngine.Random.value * range * 2.0f - range + (rand.Next(MAX_SUBTRACT_HEIGHT, MAX_ADD_HEIGHT) % SpikeRandomness == 0 ? rand.Next(MAX_SUBTRACT_HEIGHT, MAX_ADD_HEIGHT) : 0 );
+    float spike = (rand.Next(MAX_SUBTRACT_HEIGHT, MAX_ADD_HEIGHT) % SpikeRandomness == 0 ? rand.Next(MAX_SUBTRACT_HEIGHT, MAX_ADD_HEIGHT) + UnityEngine.Random.value : UnityEngine.Random.value);
+    // baseHeight += (UnityEngine.Random.value + spike) * range * 2.0f - range;
+    baseHeight += spike * 2.0f * range - range;
+
+    return baseHeight;
   }
   void DiamondSquare()
   {
@@ -118,8 +121,11 @@ public class TerrainGeneratorScript : MonoBehaviour
     for (int size = dimension - 1; size > 1; size /= 2)
     {
       reach /= 2;
+      // range = roughness * size;
       this.diamondStep(reach, size);
       this.squareStep(reach, size);
+      //TODO: Add credit to this equation
+      range -= range * 0.5f * roughness;
     }
   }
 
@@ -130,7 +136,7 @@ public class TerrainGeneratorScript : MonoBehaviour
       for (int x = reach; x < dimension; x += size)
       {
         float curSum = 0.0f;
-        int numOfCorners = 0;
+        float numOfCorners = 0.0f;
         (int, int)[] coordinates = this.getDiamondPattern(x, y, reach);
         foreach ((int diamondX, int diamondY) c in coordinates)
         {
@@ -154,7 +160,7 @@ public class TerrainGeneratorScript : MonoBehaviour
       for (int x = (even ? reach : 0); x < dimension; x += size)
       {
         float curSum = 0.0f;
-        int numOfCorners = 0;
+        float numOfCorners = 0.0f;
         (int, int)[] coordinates = this.getSquarePattern(x, y, reach);
         foreach ((int squareX, int squareY) c in coordinates)
         {
@@ -192,7 +198,8 @@ public class TerrainGeneratorScript : MonoBehaviour
 
   float GenerateRandom()
   {
-    return this.rand.Next(MIN_HEIGHT, MAX_HEIGHT);
+    // return (this.rand.Next(MIN_HEIGHT, MAX_HEIGHT) + (float)this.rand.NextDouble());
+    return UnityEngine.Random.value;
   }
 
   Boolean IsWithinMap(int x, int y)
@@ -203,7 +210,7 @@ public class TerrainGeneratorScript : MonoBehaviour
 
   void assignHeight(int x, int y, float value)
   {
-    this.heightMap[y][x] = new Vector3(x - this.OFFSET, value, y - this.OFFSET);
+    this.vectorArray[y][x] = new Vector3(x - this.OFFSET, value, y - this.OFFSET);
     if (value > this.highestPeak)
     {
       this.highestPeak = value;
@@ -214,11 +221,11 @@ public class TerrainGeneratorScript : MonoBehaviour
   {
     if (!this.containsCoordinate(x, y))
       throw new System.InvalidOperationException("Accessing a coordinate that has not been assigned a height");
-    return this.heightMap[y][x];
+    return this.vectorArray[y][x];
   }
 
   Boolean containsCoordinate(int x, int y)
   {
-    return this.heightMap[y][x] != null;
+    return this.vectorArray[y][x] != null;
   }
 }
