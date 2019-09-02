@@ -12,9 +12,9 @@ public class TerrainGeneratorScript : MonoBehaviour
   private Color[] colors;
   public int MAX_HEIGHT = 50, MIN_HEIGHT = -30, dimension = 5;
   public int MAX_ADD_HEIGHT = 2, MAX_SUBTRACT_HEIGHT = -5;
-  public float step = 1.0f;
-  private int maxDimension, minDimension;
-  Dictionary<(int, int), Vector3> heightMap = new Dictionary<(int, int), Vector3>();
+  private int maxDimension, minDimension, OFFSET;
+  private float highestPeak;
+  Vector3[][] heightMap;
   private System.Random rand;
   // Start is called before the first frame update
   void Start()
@@ -34,9 +34,9 @@ public class TerrainGeneratorScript : MonoBehaviour
 
     for (int i = 0; i < mesh.vertices.Length; i++)
     {
-      if (mesh.vertices[i].y > 0.5 * MAX_HEIGHT)
+      if (mesh.vertices[i].y > 0.5 * highestPeak)
         colors[i] = Color.white;
-      else if (mesh.vertices[i].y > 0.2 * MAX_HEIGHT)
+      else if (mesh.vertices[i].y > 0.2 * highestPeak)
         colors[i] = Color.green;
       else
         colors[i] = Color.blue;
@@ -50,9 +50,9 @@ public class TerrainGeneratorScript : MonoBehaviour
   void GenerateVertices()
   {
     List<Vector3> verticesList = new List<Vector3>();
-    for (int y = minDimension; y < maxDimension - 1; y++)
+    for (int y = 0; y < dimension - 1; y++)
     {
-      for (int x = minDimension; x < maxDimension - 1; x++)
+      for (int x = 0; x < dimension - 1; x++)
       {
         var pivot = (x, y);
         var top = (x, y + 1);
@@ -61,7 +61,7 @@ public class TerrainGeneratorScript : MonoBehaviour
         (int, int)[] order = new (int, int)[] { pivot, top, diagonal, pivot, diagonal, right };
         foreach ((int vx, int vy) o in order)
         {
-          verticesList.Add(this.getHeight(o.vx, o.vy));
+          verticesList.Add(this.getVertice(o.vx, o.vy));
         }
       }
     }
@@ -71,30 +71,28 @@ public class TerrainGeneratorScript : MonoBehaviour
 
   void GenerateTerrainHeights()
   {
-    this.maxDimension = (int)(dimension / (2 * step)) + 1;
-    this.minDimension = (int)(-dimension / (2 * step));
+    this.maxDimension = (int)(dimension / 2) + 1;
+    this.minDimension = (int)(-dimension / 2);
+    this.OFFSET = maxDimension - 1;
+    this.highestPeak = MIN_HEIGHT;
+    this.heightMap = new Vector3[dimension][];
+    for (int i = 0; i < dimension; i++)
+      this.heightMap[i] = new Vector3[dimension];
     rand = new System.Random();
     this.CornerGenerator();
+    // this.PrintHeights();
     this.DiamondSquare();
     // this.PrintHeights();
   }
 
   void PrintHeights()
   {
-    Vector3 value;
     StringBuilder sb = new StringBuilder();
-    for (int i = minDimension; i < maxDimension - 1; i++)
+    for (int i = 0; i < dimension; i++)
     {
-      for (int j = minDimension; j < maxDimension - 1; j++)
+      for (int j = 0; j < dimension; j++)
       {
-        if (this.heightMap.TryGetValue((i, j), out value))
-        {
-          sb.AppendFormat("{0,-10:0.##}", value.y);
-        }
-        else
-        {
-          sb.AppendFormat("     ");
-        }
+        sb.AppendFormat("{0,-10:0.##}", this.heightMap[j][i].y);
       }
       sb.AppendLine();
     }
@@ -116,22 +114,20 @@ public class TerrainGeneratorScript : MonoBehaviour
   }
   void DiamondSquare()
   {
-    int reach = maxDimension - 1;
-    int offset = reach;
+    int reach = dimension - 1;
     for (int size = dimension - 1; size > 1; size /= 2)
     {
-      this.diamondStep(reach, size, offset);
-      this.squareStep(reach, size, offset);
       reach /= 2;
+      this.diamondStep(reach, size);
+      this.squareStep(reach, size);
     }
   }
 
-  void diamondStep(int reach, int size, int offset)
+  void diamondStep(int reach, int size)
   {
-    int start = reach - offset;
-    for (int y = start; y < maxDimension; y += size)
+    for (int y = reach; y < dimension; y += size)
     {
-      for (int x = start; x < maxDimension; x += size)
+      for (int x = reach; x < dimension; x += size)
       {
         float curSum = 0.0f;
         int numOfCorners = 0;
@@ -140,22 +136,22 @@ public class TerrainGeneratorScript : MonoBehaviour
         {
           if (this.IsWithinMap(c.diamondX, c.diamondY))
           {
-
-            curSum += this.getHeight(c.diamondX, c.diamondY).y;
+            curSum += this.getVertice(c.diamondX, c.diamondY).y;
             numOfCorners++;
           }
         }
-        this.assignHeight(y, x, this.generateHeight(curSum / numOfCorners));
+        // Debug.Log(String.Format("Assigning ({0}, {1}), size: {2}, reach: {3}", x, y, size, reach));
+        this.assignHeight(x, y, this.generateHeight(curSum / numOfCorners));
       }
     }
   }
 
-  void squareStep(int reach, int size, int offset)
+  void squareStep(int reach, int size)
   {
     Boolean even = true;
-    for (int y = minDimension; y < maxDimension; y += reach)
+    for (int y = 0; y < dimension; y += reach)
     {
-      for (int x = (even ? reach : 0) - offset; x < maxDimension; x += size)
+      for (int x = (even ? reach : 0); x < dimension; x += size)
       {
         float curSum = 0.0f;
         int numOfCorners = 0;
@@ -165,12 +161,12 @@ public class TerrainGeneratorScript : MonoBehaviour
           if (this.IsWithinMap(c.squareX, c.squareY))
           {
 
-            curSum += this.getHeight(c.squareX, c.squareY).y;
+            curSum += this.getVertice(c.squareX, c.squareY).y;
             numOfCorners++;
           }
         }
-        Debug.Log(String.Format("Assigning ({0}, {1}), size: {2}, reach: {3}", x, y, size, reach));
-        this.assignHeight(y, x, this.generateHeight(curSum / numOfCorners));
+        // Debug.Log(String.Format("Assigning ({0}, {1}), size: {2}, reach: {3}", x, y, size, reach));
+        this.assignHeight(x, y, this.generateHeight(curSum / numOfCorners));
       }
       even = !even;
     }
@@ -188,10 +184,10 @@ public class TerrainGeneratorScript : MonoBehaviour
 
   void CornerGenerator()
   {
-    this.assignHeight(minDimension, minDimension, this.GenerateRandom());
-    this.assignHeight(minDimension, maxDimension - 1, this.GenerateRandom());
-    this.assignHeight(maxDimension - 1, minDimension, this.GenerateRandom());
-    this.assignHeight(maxDimension - 1, maxDimension - 1, this.GenerateRandom());
+    this.assignHeight(0, 0, this.GenerateRandom());
+    this.assignHeight(0, dimension - 1, this.GenerateRandom());
+    this.assignHeight(dimension - 1, 0, this.GenerateRandom());
+    this.assignHeight(dimension - 1, dimension - 1, this.GenerateRandom());
   }
 
   float GenerateRandom()
@@ -201,30 +197,28 @@ public class TerrainGeneratorScript : MonoBehaviour
 
   Boolean IsWithinMap(int x, int y)
   {
-    return x >= minDimension && x < maxDimension && y >= minDimension && y < maxDimension;
+    return x >= 0 && x < dimension && y >= 0 && y < dimension;
   }
 
 
-  Boolean assignHeight(int x, int y, float value)
+  void assignHeight(int x, int y, float value)
   {
-    if (this.containsCoordinate(x, y))
+    this.heightMap[y][x] = new Vector3(x - this.OFFSET, value, y - this.OFFSET);
+    if (value > this.highestPeak)
     {
-      return false;
+      this.highestPeak = value;
     }
-    this.heightMap.Add((x, y), new Vector3(x, value, y));
-    return true;
   }
 
-  Vector3 getHeight(int x, int y)
+  Vector3 getVertice(int x, int y)
   {
-    Vector3 output;
-    if (!this.heightMap.TryGetValue((x, y), out output))
+    if (!this.containsCoordinate(x, y))
       throw new System.InvalidOperationException("Accessing a coordinate that has not been assigned a height");
-    return output;
+    return this.heightMap[y][x];
   }
 
   Boolean containsCoordinate(int x, int y)
   {
-    return this.heightMap.ContainsKey((x, y));
+    return this.heightMap[y][x] != null;
   }
 }
