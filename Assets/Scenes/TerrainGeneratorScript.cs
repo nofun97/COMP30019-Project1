@@ -9,12 +9,12 @@ public class TerrainGeneratorScript : MonoBehaviour
   private int[] triangles;
 
   private Color[] colors;
-  // public int MAX_HEIGHT = 50, MIN_HEIGHT = -30,
+  // public int MAX_HEIGHT = 50, MIN_HEIGHT = -30;
   public int dimension = 5;
   public int MAX_ADD_HEIGHT = 2, MAX_SUBTRACT_HEIGHT = -5;
   public float roughness = 0.5f;
-  public int SpikeRandomness = 10;
-  public float range = 0.5f;
+  // public int SpikeRandomness = 10;
+  private float range = 0.5f;
   private int maxDimension, minDimension, OFFSET;
   private float highestPeak;
   Vector3[][] vectorArray;
@@ -102,17 +102,18 @@ public class TerrainGeneratorScript : MonoBehaviour
     Debug.Log(sb.ToString());
   }
 
-  float generateHeight(float baseHeight)
+  float generateHeight(float baseHeight, int x, int y)
   {
     //TODO: Add credit to this equation
-    // baseHeight += ((UnityEngine.Random.value * range * 2.0f) - range) + (rand.Next(MAX_SUBTRACT_HEIGHT, MAX_ADD_HEIGHT) * UnityEngine.Random.value);
-    // baseHeight += UnityEngine.Random.value * range * 2.0f - range;
-    // baseHeight += (UnityEngine.Random.value + rand.Next(MAX_SUBTRACT_HEIGHT, MAX_ADD_HEIGHT)) * range * 2.0f - range;
-    // baseHeight += UnityEngine.Random.value * range * 2.0f - range + (rand.Next(MAX_SUBTRACT_HEIGHT, MAX_ADD_HEIGHT) % SpikeRandomness == 0 ? rand.Next(MAX_SUBTRACT_HEIGHT, MAX_ADD_HEIGHT) : 0 );
-    float spike = (rand.Next(MAX_SUBTRACT_HEIGHT, MAX_ADD_HEIGHT) % SpikeRandomness == 0 ? rand.Next(MAX_SUBTRACT_HEIGHT, MAX_ADD_HEIGHT) + UnityEngine.Random.value : UnityEngine.Random.value);
-    // baseHeight += (UnityEngine.Random.value + spike) * range * 2.0f - range;
-    baseHeight += spike * 2.0f * range - range;
+    float random = rand.Next(MAX_SUBTRACT_HEIGHT, MAX_ADD_HEIGHT) + UnityEngine.Random.value;
 
+
+    // if (random < 0) {
+    //   random = rand.Next() % 6 <= 2 ? random : 0;
+    // }
+
+    baseHeight += random * 2.0f * range - range;
+    // baseHeight += random * 2.0f * range * ((float)(Math.Cos((x - OFFSET) * 0.01f) * Math.Cos((y - OFFSET) * 0.01f))) - range;
     return baseHeight;
   }
   void DiamondSquare()
@@ -121,11 +122,11 @@ public class TerrainGeneratorScript : MonoBehaviour
     for (int size = dimension - 1; size > 1; size /= 2)
     {
       reach /= 2;
-      // range = roughness * size;
+      range = roughness * size * 0.05f;
       this.diamondStep(reach, size);
       this.squareStep(reach, size);
       //TODO: Add credit to this equation
-      range -= range * 0.5f * roughness;
+      // range -= range * 0.5f * roughness;
     }
   }
 
@@ -147,7 +148,7 @@ public class TerrainGeneratorScript : MonoBehaviour
           }
         }
         // Debug.Log(String.Format("Assigning ({0}, {1}), size: {2}, reach: {3}", x, y, size, reach));
-        this.assignHeight(x, y, this.generateHeight(curSum / numOfCorners));
+        this.assignHeight(x, y, this.generateHeight(curSum / numOfCorners, x, y));
       }
     }
   }
@@ -172,7 +173,7 @@ public class TerrainGeneratorScript : MonoBehaviour
           }
         }
         // Debug.Log(String.Format("Assigning ({0}, {1}), size: {2}, reach: {3}", x, y, size, reach));
-        this.assignHeight(x, y, this.generateHeight(curSum / numOfCorners));
+        this.assignHeight(x, y, this.generateHeight(curSum / numOfCorners, x, y));
       }
       even = !even;
     }
@@ -199,6 +200,7 @@ public class TerrainGeneratorScript : MonoBehaviour
   float GenerateRandom()
   {
     // return (this.rand.Next(MIN_HEIGHT, MAX_HEIGHT) + (float)this.rand.NextDouble());
+    // return rand.Next() % 5 < 1 ? this.rand.Next(MIN_HEIGHT, MAX_HEIGHT) + UnityEngine.Random.value : UnityEngine.Random.value;
     return UnityEngine.Random.value;
   }
 

@@ -216,7 +216,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0fd33b90807d544468c80b3390e46913, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cameraSpeed: 2
+  cameraSpeed: 10
   yawSpeed: 500
   pitchSpeed: 500
 --- !u!1 &117153328
@@ -232,6 +232,7 @@ GameObject:
   - component: {fileID: 117153331}
   - component: {fileID: 117153330}
   - component: {fileID: 117153329}
+  - component: {fileID: 117153334}
   m_Layer: 0
   m_Name: Plane
   m_TagString: Untagged
@@ -251,12 +252,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f31fd7b33d9f04b63affabb4bb572adc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MAX_HEIGHT: 100
-  MIN_HEIGHT: -30
   dimension: 65
-  MAX_ADD_HEIGHT: 2
-  MAX_SUBTRACT_HEIGHT: -2
-  roughness: 1
+  MAX_ADD_HEIGHT: 45
+  MAX_SUBTRACT_HEIGHT: -40
+  roughness: 0.05
+  landRatio: 0.7
 --- !u!64 &117153330
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -330,6 +330,17 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!154 &117153334
+TerrainCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 117153328}
+  m_Material: {fileID: 0}
+  m_Enabled: 1
+  m_TerrainData: {fileID: 0}
+  m_EnableTreeColliders: 1
 --- !u!1 &1472344926
 GameObject:
   m_ObjectHideFlags: 0
