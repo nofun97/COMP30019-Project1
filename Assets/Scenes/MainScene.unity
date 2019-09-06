@@ -253,10 +253,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   dimension: 65
-  MAX_ADD_HEIGHT: 45
-  MAX_SUBTRACT_HEIGHT: -40
+  MAX_ADD_HEIGHT: 50
+  MAX_SUBTRACT_HEIGHT: -20
   roughness: 0.05
-  landRatio: 0.7
 --- !u!64 &117153330
 MeshCollider:
   m_ObjectHideFlags: 0

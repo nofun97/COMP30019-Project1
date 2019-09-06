@@ -32,18 +32,6 @@ public class TerrainGeneratorScript : MonoBehaviour
     this.GenerateVertices();
     mesh.vertices = vertices;
     this.triangles = new int[mesh.vertices.Length];
-    this.colors = new Color[mesh.vertices.Length];
-
-    for (int i = 0; i < mesh.vertices.Length; i++)
-    {
-      if (mesh.vertices[i].y > 0.5 * highestPeak)
-        colors[i] = Color.white;
-      else if (mesh.vertices[i].y > 0.2 * highestPeak)
-        colors[i] = Color.green;
-      else
-        colors[i] = Color.blue;
-    }
-    mesh.colors = this.colors;
     for (int i = 0; i < mesh.vertices.Length; i++)
       triangles[i] = i;
     mesh.triangles = this.triangles;
