@@ -40,7 +40,7 @@ Shader "Custom/WaveShader"
 			vertOut vert(vertIn v)
 			{
 				// Displace the original vertex in model space
-				float4 displacement = float4(0.0f, sin(v.vertex.x + _Time.y), 0.0f, 0.0f); // Q4
+				float4 displacement = float4(0.0f, sin(v.vertex.x + _Time.y), 0.0f, 0.0f);
 				v.vertex += displacement;
 
 				vertOut o;
