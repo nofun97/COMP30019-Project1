@@ -21,11 +21,10 @@
 // Adapted for COMP30019 by Jeremy Nicholson, 10 Sep 2012
 // Adapted further by Chris Ewin, 23 Sep 2013
 // Adapted further (again) by Alex Zable (port to Unity), 19 Aug 2016
-// Adapted further (again again) by Novan Allanadi, Michelle Anggana, Patrick
-// Setiawan, 07 Sep 2019
+
 //UNITY_SHADER_NO_UPGRADE
 
-Shader "Unlit/TerrainShader"
+Shader "Unlit/PhongShader"
 {
 	Properties
 	{
@@ -49,6 +48,7 @@ Shader "Unlit/TerrainShader"
 			{
 				float4 vertex : POSITION;
 				float4 normal : NORMAL;
+				float4 color : COLOR;
 			};
 
 			struct vertOut
@@ -109,7 +109,7 @@ Shader "Unlit/TerrainShader"
 
 				// Calculate specular reflections
 				float Ks = 1;
-				float specN = 5; // Values>>1 give tighter highlights
+				float specN = 1; // Values>>1 give tighter highlights
 				float3 V = normalize(_WorldSpaceCameraPos - v.worldVertex.xyz);
 				// Using classic reflection calculation:
 				float3 R = normalize((2.0 * LdotN * interpNormal) - L);

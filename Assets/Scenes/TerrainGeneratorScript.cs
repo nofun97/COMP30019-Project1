@@ -19,7 +19,6 @@ public class TerrainGeneratorScript : MonoBehaviour
   // public int SpikeRandomness = 10;
   private float range = 0.5f;
   private int maxDimension, minDimension, OFFSET;
-  private float highestPeak;
   Vector3[][] vectorArray;
   private System.Random rand;
   // Start is called before the first frame update
@@ -41,13 +40,35 @@ public class TerrainGeneratorScript : MonoBehaviour
 
   void GenerateMesh()
   {
-    Mesh mesh = GetComponent<MeshFilter>().mesh;
+    Mesh mesh = new Mesh();
+    mesh.name = "Terrain";
     this.GenerateVertices();
     mesh.vertices = vertices;
     this.triangles = new int[mesh.vertices.Length];
     for (int i = 0; i < mesh.vertices.Length; i++)
       triangles[i] = i;
     mesh.triangles = this.triangles;
+    Vector3[] normals = new Vector3[mesh.vertices.Length];
+    for (int i = 0; i < mesh.vertices.Length; i += 6)
+    {
+      Vector3 lhs1 = vertices[i] - vertices[i + 1];
+      Vector3 rhs1 = vertices[i + 2] - vertices[i + 1];
+      Vector3 cross1 = Vector3.Cross(rhs1, lhs1).normalized;
+
+      Vector3 lhs2 = vertices[i + 5] - vertices[i + 3];
+      Vector3 rhs2 = vertices[i + 4] - vertices[i + 3];
+      Vector3 cross2 = Vector3.Cross(rhs2, lhs2).normalized;
+
+      for (int j = 0; j < 6; j++)
+      {
+        if (j < 3)
+          normals[i + j] = cross1;
+        else
+          normals[i + j] = cross2;
+      }
+    }
+    mesh.normals = normals;
+    this.gameObject.GetComponent<MeshFilter>().mesh = mesh;
   }
 
   void GenerateVertices()
@@ -77,7 +98,6 @@ public class TerrainGeneratorScript : MonoBehaviour
     this.maxDimension = (int)(dimension / 2) + 1;
     this.minDimension = (int)(-dimension / 2);
     this.OFFSET = maxDimension - 1;
-    this.highestPeak = -1;
     this.vectorArray = new Vector3[dimension][];
     for (int i = 0; i < dimension; i++)
       this.vectorArray[i] = new Vector3[dimension];
@@ -210,10 +230,6 @@ public class TerrainGeneratorScript : MonoBehaviour
   void assignHeight(int x, int y, float value)
   {
     this.vectorArray[y][x] = new Vector3(x - this.OFFSET, value, y - this.OFFSET);
-    if (value > this.highestPeak)
-    {
-      this.highestPeak = value;
-    }
   }
 
   Vector3 getVertice(int x, int y)
