@@ -6,6 +6,7 @@ using System.Text;
 public class TerrainGeneratorScript : MonoBehaviour
 {
   private Vector3[] vertices;
+  private Boolean iteration = false;
   private int[] triangles;
 
   private Color[] colors;
@@ -93,15 +94,11 @@ public class TerrainGeneratorScript : MonoBehaviour
   float generateHeight(float baseHeight, int x, int y)
   {
     //TODO: Add credit to this equation
-    float random = rand.Next(MAX_SUBTRACT_HEIGHT, MAX_ADD_HEIGHT) + UnityEngine.Random.value;
-
-
-    // if (random < 0) {
-    //   random = rand.Next() % 6 <= 2 ? random : 0;
-    // }
-
+    // float random = rand.Next(MAX_SUBTRACT_HEIGHT, MAX_ADD_HEIGHT) + UnityEngine.Random.value;
+    float random = (iteration ? rand.Next(MAX_SUBTRACT_HEIGHT, 0) : rand.Next(0, MAX_ADD_HEIGHT));
+    iteration = !iteration;
     baseHeight += random * 2.0f * range - range;
-    // baseHeight += random * 2.0f * range * ((float)(Math.Cos((x - OFFSET) * 0.01f) * Math.Cos((y - OFFSET) * 0.01f))) - range;
+    // baseHeight += random * 2.0f * range * ((float)(Math.Cos((x - OFFSET) * 0.05f) * Math.Cos((y - OFFSET) * 0.05f))) - range;
     return baseHeight;
   }
   void DiamondSquare()
@@ -113,8 +110,6 @@ public class TerrainGeneratorScript : MonoBehaviour
       range = roughness * size * 0.05f;
       this.diamondStep(reach, size);
       this.squareStep(reach, size);
-      //TODO: Add credit to this equation
-      // range -= range * 0.5f * roughness;
     }
   }
 
@@ -179,15 +174,17 @@ public class TerrainGeneratorScript : MonoBehaviour
 
   void CornerGenerator()
   {
+    // this.assignHeight(0, 0, (float) rand.Next(15, 30));
     this.assignHeight(0, 0, this.GenerateRandom());
     this.assignHeight(0, dimension - 1, this.GenerateRandom());
     this.assignHeight(dimension - 1, 0, this.GenerateRandom());
     this.assignHeight(dimension - 1, dimension - 1, this.GenerateRandom());
+    // this.assignHeight(dimension - 1, dimension - 1, (float)rand.Next(-30, -15));
   }
 
   float GenerateRandom()
   {
-    // return (this.rand.Next(MIN_HEIGHT, MAX_HEIGHT) + (float)this.rand.NextDouble());
+    // return (this.rand.Next(-10, 0) + (float)this.rand.NextDouble());
     // return rand.Next() % 5 < 1 ? this.rand.Next(MIN_HEIGHT, MAX_HEIGHT) + UnityEngine.Random.value : UnityEngine.Random.value;
     return UnityEngine.Random.value;
   }
