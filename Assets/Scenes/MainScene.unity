@@ -252,6 +252,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f31fd7b33d9f04b63affabb4bb572adc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  pointLight: {fileID: 892703800}
   dimension: 65
   MAX_ADD_HEIGHT: 10
   MAX_SUBTRACT_HEIGHT: -10

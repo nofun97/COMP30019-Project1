@@ -75,7 +75,7 @@ Shader "Unlit/TerrainShader"
 				o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
 				if (v.vertex.y < 0) {
 					o.color = float4(0.0f, 0.0f, 1.0f, 1.0f);
-				} else if (v.vertex.y > 10) {
+				} else if (v.vertex.y > 7) {
 					o.color = float4(1.0f, 1.0f, 1.0f, 1.0f);
 				} else {
 					o.color = float4(0.376f, 0.502f, 0.22f, 1.0f);
@@ -96,7 +96,7 @@ Shader "Unlit/TerrainShader"
 				float3 interpNormal = normalize(v.worldNormal);
 
 				// Calculate ambient RGB intensities
-				float Ka = 5;
+				float Ka = 1;
 				float3 amb = v.color.rgb * UNITY_LIGHTMODEL_AMBIENT.rgb * Ka;
 
 				// Calculate diffuse RBG reflections, we save the results of L.N because we will use it again

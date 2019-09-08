@@ -5,6 +5,8 @@ using System.Text;
 
 public class TerrainGeneratorScript : MonoBehaviour
 {
+  public PointLight pointLight;
+
   private Vector3[] vertices;
   private Boolean iteration = false;
   private int[] triangles;
@@ -25,6 +27,16 @@ public class TerrainGeneratorScript : MonoBehaviour
   {
     this.GenerateTerrainHeights();
     this.GenerateMesh();
+  }
+
+  void Update()
+  {
+    // Get renderer component (in order to pass params to shader)
+    MeshRenderer renderer = this.gameObject.GetComponent<MeshRenderer>();
+
+    // Pass updated light positions to shader
+    renderer.material.SetColor("_PointLightColor", this.pointLight.color);
+    renderer.material.SetVector("_PointLightPosition", this.pointLight.GetWorldPosition());
   }
 
   void GenerateMesh()
