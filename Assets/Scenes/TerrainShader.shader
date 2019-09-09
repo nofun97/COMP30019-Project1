@@ -29,10 +29,18 @@ Shader "Unlit/PhongShader"
 {
 	Properties
 	{
-		_PointLightColor ("Point Light Color", Color) = (0, 0, 0)
-		_PointLightPosition ("Point Light Position", Vector) = (0.0, 0.0, 0.0)
-		_MinimumMountainHeight ("Minimum Mountain Height", Float) = 10.0
-		_MaxSeaLevel ("Max Sea Level", Float) = 5.0
+		_PointLightColor("Point Light Color", Color) =(0, 0, 0)
+		_PointLightPosition("Point Light Position", Vector) = (0.0, 0.0, 0.0)
+		_MinimumMountainHeight("Minimum Mountain Height", Float) = 10.0
+		_MaxSeaLevel("Max Sea Level", Float) = 5.0
+		_AmbientReflectionConstant("Ambient Reflection Constant", Float) = 1.0
+		_SpecularReflectivity("Specular Reflectivity", Float) = 0.75
+		_DiffuseReflectivity("Diffuse Reflectivity", Float) = 1.0
+		_HighlightsTightness("Highlights Tightness", Float) = 1.0
+		_AttenuationFactor("Attenuation Factor", Float) = 1.0
+		_PeakColor("Peak Color", Color) = (1.0, 1.0, 1.0, 1.0)
+		_GroundColor("Ground Color", Color) = (0.376, 0.502, 0.22, 1.0)
+		_SeaFloorColor("Sea Floor Color", Color) = (0.34, 0.23, 0.04, 1.0)
 	}
 	SubShader
 	{
@@ -48,6 +56,14 @@ Shader "Unlit/PhongShader"
 			uniform float3 _PointLightPosition;
 			float _MinimumMountainHeight;
 			float _MaxSeaLevel;
+			float _AmbientReflectionConstant;
+			float _SpecularReflectivity;
+			float _DiffuseReflectivity;
+			float _HighlightsTightness;
+			float _AttenuationFactor;
+			float4 _PeakColor;
+			float4 _GroundColor;
+			float4 _SeaFloorColor;
 
 			struct vertIn
 			{
@@ -79,11 +95,11 @@ Shader "Unlit/PhongShader"
 				// Transform vertex in world coordinates to camera coordinates, and pass colour
 				o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
 				if (v.vertex.y <= _MaxSeaLevel) {
-					o.color = float4(0.34f, 0.23f, 0.04f, 1.0f);
+					o.color = _SeaFloorColor;
 				} else if (v.vertex.y >= _MinimumMountainHeight) {
-					o.color = float4(1.0f, 1.0f, 1.0f, 1.0f);
+					o.color = _PeakColor;
 				} else {
-					o.color = float4(0.376f, 0.502f, 0.22f, 1.0f);
+					o.color = _GroundColor;
 				}
 
 				// Pass out the world vertex position and world normal to be interpolated
@@ -101,20 +117,20 @@ Shader "Unlit/PhongShader"
 				float3 interpNormal = normalize(v.worldNormal);
 
 				// Calculate ambient RGB intensities
-				float Ka = 2;
+				float Ka = _AmbientReflectionConstant;
 				float3 amb = v.color.rgb * UNITY_LIGHTMODEL_AMBIENT.rgb * Ka;
 
 				// Calculate diffuse RBG reflections, we save the results of L.N because we will use it again
 				// (when calculating the reflected ray in our specular component)
-				float fAtt = 1;
-				float Kd = 1;
+				float fAtt = _AttenuationFactor;
+				float Kd = _DiffuseReflectivity;
 				float3 L = normalize(v.worldVertex.xyz - _PointLightPosition);
 				float LdotN = dot(L, interpNormal);
 				float3 dif = fAtt * _PointLightColor.rgb * Kd * v.color.rgb * saturate(LdotN);
 
 				// Calculate specular reflections
-				float Ks = 0.5;
-				float specN = 1; // Values>>1 give tighter highlights
+				float Ks = _SpecularReflectivity;
+				float specN = _HighlightsTightness; // Values>>1 give tighter highlights
 				float3 V = normalize(_WorldSpaceCameraPos - v.worldVertex.xyz);
 				// Using classic reflection calculation:
 				float3 R = normalize((2.0 * LdotN * interpNormal) - L);
