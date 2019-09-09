@@ -256,7 +256,7 @@ MonoBehaviour:
   dimension: 65
   MAX_ADD_HEIGHT: 10
   MAX_SUBTRACT_HEIGHT: -10
-  roughness: 0.1
+  roughness: 0.25
 --- !u!64 &117153330
 MeshCollider:
   m_ObjectHideFlags: 0
