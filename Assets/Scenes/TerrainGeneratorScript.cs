@@ -48,27 +48,40 @@ public class TerrainGeneratorScript : MonoBehaviour
     for (int i = 0; i < mesh.vertices.Length; i++)
       triangles[i] = i;
     mesh.triangles = this.triangles;
-    Vector3[] normals = new Vector3[mesh.vertices.Length];
-    for (int i = 0; i < mesh.vertices.Length; i += 6)
-    {
-      Vector3 lhs1 = vertices[i] - vertices[i + 1];
-      Vector3 rhs1 = vertices[i + 2] - vertices[i + 1];
-      Vector3 cross1 = Vector3.Cross(rhs1, lhs1).normalized;
+    Vector3[] normals = this.generateNormals();
+    this.gameObject.GetComponent<MeshFilter>().mesh = mesh;
+  }
 
-      Vector3 lhs2 = vertices[i + 5] - vertices[i + 3];
-      Vector3 rhs2 = vertices[i + 4] - vertices[i + 3];
-      Vector3 cross2 = Vector3.Cross(rhs2, lhs2).normalized;
+  Vector3[] generateNormals()
+  {
+    List<Vector3> normals = new List<Vector3>();
+    Dictionary<Vector3, Vector3> normalMap = new Dictionary<Vector3, Vector3>();
+    for (int i = 0; i < vertices.Length; i += 6)
+    {
+      Vector3 side1, side2, diagonal, cross1, cross2;
+      side1 = vertices[i + 1] - vertices[i];
+      side2 = vertices[i + 5] - vertices[i];
+      diagonal = vertices[i + 2] - vertices[i];
+      cross1 = Vector3.Cross(side1, diagonal);
+      cross2 = Vector3.Cross(diagonal, side2);
 
       for (int j = 0; j < 6; j++)
       {
-        if (j < 3)
-          normals[i + j] = cross1;
+        Vector3 cross = j < 3 ? cross1 : cross2;
+        if (normalMap.ContainsKey(vertices[i + j]))
+          normalMap[vertices[i + j]] += cross;
         else
-          normals[i + j] = cross2;
+          normalMap[vertices[i + j]] = cross;
       }
     }
-    mesh.normals = normals;
-    this.gameObject.GetComponent<MeshFilter>().mesh = mesh;
+
+    foreach (Vector3 vector in vertices)
+    {
+      Vector3 output;
+      normalMap.TryGetValue(vector, out output);
+      normals.Add(output.normalized);
+    }
+    return normals.ToArray();
   }
 
   void GenerateVertices()
