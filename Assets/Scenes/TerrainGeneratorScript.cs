@@ -15,6 +15,10 @@ public class TerrainGeneratorScript : MonoBehaviour
   // public int MAX_HEIGHT = 50, MIN_HEIGHT = -30;
   public int dimension = 5;
   public int MAX_ADD_HEIGHT = 2, MAX_SUBTRACT_HEIGHT = -5;
+
+  public float STEP = 0.5f;
+
+  public float INITIAL_HEIGHT_ADDITION = 30;
   public float roughness = 0.5f;
   // public int SpikeRandomness = 10;
   private float range = 0.5f;
@@ -140,9 +144,16 @@ public class TerrainGeneratorScript : MonoBehaviour
   {
     //TODO: Add credit to this equation
     // float random = rand.Next(MAX_SUBTRACT_HEIGHT, MAX_ADD_HEIGHT) + UnityEngine.Random.value;
-    float random = (iteration ? rand.Next(MAX_SUBTRACT_HEIGHT, 0) : rand.Next(0, MAX_ADD_HEIGHT));
-    iteration = !iteration;
+    // float random = (iteration ? rand.Next(MAX_SUBTRACT_HEIGHT, 0) : rand.Next(0, MAX_ADD_HEIGHT));
+    // iteration = !iteration;
+    float random = INITIAL_HEIGHT_ADDITION + UnityEngine.Random.value;
     baseHeight += random * 2.0f * range - range;
+    // baseHeight += random;
+    INITIAL_HEIGHT_ADDITION /= 1.5f;
+    INITIAL_HEIGHT_ADDITION += (float) rand.Next(MAX_SUBTRACT_HEIGHT, MAX_ADD_HEIGHT);
+    // INITIAL_HEIGHT_ADDITION += (iteration ? rand.Next((int) MAX_SUBTRACT_HEIGHT, 0) : rand.Next(0, (int) MAX_ADD_HEIGHT));
+    // iteration = !iteration;
+    
     // baseHeight += random * 2.0f * range * ((float)(Math.Cos((x - OFFSET) * 0.05f) * Math.Cos((y - OFFSET) * 0.05f))) - range;
     return baseHeight;
   }
@@ -242,7 +253,7 @@ public class TerrainGeneratorScript : MonoBehaviour
 
   void assignHeight(int x, int y, float value)
   {
-    this.vectorArray[y][x] = new Vector3(x - this.OFFSET, value, y - this.OFFSET);
+    this.vectorArray[y][x] = new Vector3((x - this.OFFSET) * STEP, value, (y - this.OFFSET) * STEP);
   }
 
   Vector3 getVertice(int x, int y)
