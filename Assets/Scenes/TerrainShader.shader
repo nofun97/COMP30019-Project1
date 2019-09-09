@@ -21,6 +21,7 @@
 // Adapted for COMP30019 by Jeremy Nicholson, 10 Sep 2012
 // Adapted further by Chris Ewin, 23 Sep 2013
 // Adapted further (again) by Alex Zable (port to Unity), 19 Aug 2016
+// Adapted even further by Patrick Setiawan, Michelle Anggana, Novan Allanadi 09 Sept 2019
 
 //UNITY_SHADER_NO_UPGRADE
 
@@ -28,8 +29,10 @@ Shader "Unlit/PhongShader"
 {
 	Properties
 	{
-		_PointLightColor("Point Light Color", Color) = (0, 0, 0)
-		_PointLightPosition("Point Light Position", Vector) = (0.0, 0.0, 0.0)
+		_PointLightColor ("Point Light Color", Color) = (0, 0, 0)
+		_PointLightPosition ("Point Light Position", Vector) = (0.0, 0.0, 0.0)
+		_MinimumMountainHeight ("Minimum Mountain Height", Float) = 10.0
+		_MaxSeaLevel ("Max Sea Level", Float) = 5.0
 	}
 	SubShader
 	{
@@ -43,6 +46,8 @@ Shader "Unlit/PhongShader"
 
 			uniform float3 _PointLightColor;
 			uniform float3 _PointLightPosition;
+			float _MinimumMountainHeight;
+			float _MaxSeaLevel;
 
 			struct vertIn
 			{
@@ -73,9 +78,9 @@ Shader "Unlit/PhongShader"
 
 				// Transform vertex in world coordinates to camera coordinates, and pass colour
 				o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
-				if (v.vertex.y < 0) {
-					o.color = float4(0.0f, 0.0f, 1.0f, 1.0f);
-				} else if (v.vertex.y > 7) {
+				if (v.vertex.y <= _MaxSeaLevel) {
+					o.color = float4(0.34f, 0.23f, 0.04f, 1.0f);
+				} else if (v.vertex.y >= _MinimumMountainHeight) {
 					o.color = float4(1.0f, 1.0f, 1.0f, 1.0f);
 				} else {
 					o.color = float4(0.376f, 0.502f, 0.22f, 1.0f);
@@ -96,19 +101,19 @@ Shader "Unlit/PhongShader"
 				float3 interpNormal = normalize(v.worldNormal);
 
 				// Calculate ambient RGB intensities
-				float Ka = 1;
+				float Ka = 2;
 				float3 amb = v.color.rgb * UNITY_LIGHTMODEL_AMBIENT.rgb * Ka;
 
 				// Calculate diffuse RBG reflections, we save the results of L.N because we will use it again
 				// (when calculating the reflected ray in our specular component)
 				float fAtt = 1;
 				float Kd = 1;
-				float3 L = normalize(_PointLightPosition - v.worldVertex.xyz);
+				float3 L = normalize(v.worldVertex.xyz - _PointLightPosition);
 				float LdotN = dot(L, interpNormal);
 				float3 dif = fAtt * _PointLightColor.rgb * Kd * v.color.rgb * saturate(LdotN);
 
 				// Calculate specular reflections
-				float Ks = 1;
+				float Ks = 0.5;
 				float specN = 1; // Values>>1 give tighter highlights
 				float3 V = normalize(_WorldSpaceCameraPos - v.worldVertex.xyz);
 				// Using classic reflection calculation:
