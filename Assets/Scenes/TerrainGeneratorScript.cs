@@ -1,23 +1,21 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using System;
-using System.Text;
+using System.Collections.Generic;
 
 public class TerrainGeneratorScript : MonoBehaviour
 {
   public PointLight pointLight;
-
   private Vector3[] vertices;
   private int[] triangles;
 
-  // public int MAX_HEIGHT = 50, MIN_HEIGHT = -30;
+  private int vectorCounts;
   public int dimension = 5;
 
   public float STEP = 0.5f;
 
   public float HeightVariance = 30;
   private int maxDimension, minDimension, OFFSET;
-  Vector3[][] vectorArray;
+  Vector3[] vectorArray;
   private System.Random rand;
   // Start is called before the first frame update
   void Start()
@@ -52,7 +50,7 @@ public class TerrainGeneratorScript : MonoBehaviour
 
   Vector3[] generateNormals()
   {
-    List<Vector3> normals = new List<Vector3>();
+    Vector3[] normals = new Vector3[(dimension - 1) * (dimension - 1) * 6];
     Dictionary<Vector3, Vector3> normalMap = new Dictionary<Vector3, Vector3>();
     for (int i = 0; i < vertices.Length; i += 6)
     {
@@ -73,18 +71,21 @@ public class TerrainGeneratorScript : MonoBehaviour
       }
     }
 
-    foreach (Vector3 vector in vertices)
+    for (int i = 0; i < vertices.Length; i++)
     {
       Vector3 output;
-      normalMap.TryGetValue(vector, out output);
-      normals.Add(output.normalized);
+      normalMap.TryGetValue(vertices[i], out output);
+      normals[i] = output;
     }
-    return normals.ToArray();
+
+    return normals;
   }
 
   void GenerateVertices()
   {
-    List<Vector3> verticesList = new List<Vector3>();
+    // List<Vector3> verticesList = new List<Vector3>();
+    this.vertices = new Vector3[(dimension - 1) * (dimension - 1) * 6];
+    int index = 0;
     for (int y = 0; y < dimension - 1; y++)
     {
       for (int x = 0; x < dimension - 1; x++)
@@ -95,13 +96,9 @@ public class TerrainGeneratorScript : MonoBehaviour
         var diagonal = (x + 1, y + 1);
         (int, int)[] order = new (int, int)[] { pivot, top, diagonal, pivot, diagonal, right };
         foreach ((int vx, int vy) o in order)
-        {
-          verticesList.Add(this.getVertice(o.vx, o.vy));
-        }
+          this.vertices[index++] = this.getVertice(o.vx, o.vy);
       }
     }
-
-    this.vertices = verticesList.ToArray();
   }
 
   void GenerateTerrainHeights()
@@ -109,30 +106,26 @@ public class TerrainGeneratorScript : MonoBehaviour
     this.maxDimension = (int)(dimension / 2) + 1;
     this.minDimension = (int)(-dimension / 2);
     this.OFFSET = maxDimension - 1;
-    this.vectorArray = new Vector3[dimension][];
-    for (int i = 0; i < dimension; i++)
-      this.vectorArray[i] = new Vector3[dimension];
-    // UnityEngine.Random.InitState((int) Random.value)
+    this.vectorCounts = dimension * dimension;
+    this.vectorArray = new Vector3[this.vectorCounts];
     this.rand = new System.Random();
     this.CornerGenerator();
-    // this.PrintHeights();
     this.DiamondSquare();
-    // this.PrintHeights();
   }
 
-  void PrintHeights()
-  {
-    StringBuilder sb = new StringBuilder();
-    for (int i = 0; i < dimension; i++)
-    {
-      for (int j = 0; j < dimension; j++)
-      {
-        sb.AppendFormat("{0,-10:0.##}", this.vectorArray[j][i].y);
-      }
-      sb.AppendLine();
-    }
-    Debug.Log(sb.ToString());
-  }
+  // void PrintHeights()
+  // {
+  //   StringBuilder sb = new StringBuilder();
+  //   for (int i = 0; i < dimension; i++)
+  //   {
+  //     for (int j = 0; j < dimension; j++)
+  //     {
+  //       sb.AppendFormat("{0,-10:0.##}", this.vectorArray[j][i].y);
+  //     }
+  //     sb.AppendLine();
+  //   }
+  //   Debug.Log(sb.ToString());
+  // }
 
   float generateHeight(float baseHeight)
   {
@@ -140,12 +133,15 @@ public class TerrainGeneratorScript : MonoBehaviour
   }
   void DiamondSquare()
   {
+    System.Diagnostics.Stopwatch watch = System.Diagnostics.Stopwatch.StartNew();
     int reach = dimension - 1;
     for (int size = dimension - 1; size > 1; size /= 2)
     {
       reach /= 2;
       this.diamondStep(reach, size);
+      Debug.Log(watch.ElapsedMilliseconds);
       this.squareStep(reach, size);
+      Debug.Log(watch.ElapsedMilliseconds);
       HeightVariance /= 2.0f;
     }
   }
@@ -234,18 +230,12 @@ public class TerrainGeneratorScript : MonoBehaviour
 
   void assignHeight(int x, int y, float value)
   {
-    this.vectorArray[y][x] = new Vector3((x - this.OFFSET) * STEP, value, (y - this.OFFSET) * STEP);
+    // this.vectorArray[y][x] = new Vector3((x - this.OFFSET) * STEP, value, (y - this.OFFSET) * STEP);
+    this.vectorArray[y * dimension + x] = new Vector3((x - this.OFFSET) * STEP, value, (y - this.OFFSET) * STEP);
   }
 
   Vector3 getVertice(int x, int y)
   {
-    if (!this.containsCoordinate(x, y))
-      throw new System.InvalidOperationException("Accessing a coordinate that has not been assigned a height");
-    return this.vectorArray[y][x];
-  }
-
-  Boolean containsCoordinate(int x, int y)
-  {
-    return this.vectorArray[y][x] != null;
+    return this.vectorArray[y * dimension + x];
   }
 }
