@@ -8,20 +8,14 @@ public class TerrainGeneratorScript : MonoBehaviour
   public PointLight pointLight;
 
   private Vector3[] vertices;
-  private Boolean iteration = false;
   private int[] triangles;
 
-  private Color[] colors;
   // public int MAX_HEIGHT = 50, MIN_HEIGHT = -30;
   public int dimension = 5;
-  public int MAX_ADD_HEIGHT = 2, MAX_SUBTRACT_HEIGHT = -5;
 
   public float STEP = 0.5f;
 
-  public float INITIAL_HEIGHT_ADDITION = 30;
-  public float roughness = 0.5f;
-  // public int SpikeRandomness = 10;
-  private float range = 0.5f;
+  public float HeightVariance = 30;
   private int maxDimension, minDimension, OFFSET;
   Vector3[][] vectorArray;
   private System.Random rand;
@@ -140,23 +134,9 @@ public class TerrainGeneratorScript : MonoBehaviour
     Debug.Log(sb.ToString());
   }
 
-  float generateHeight(float baseHeight, int x, int y)
+  float generateHeight(float baseHeight)
   {
-    //TODO: Add credit to this equation
-    // float random = rand.Next(MAX_SUBTRACT_HEIGHT, MAX_ADD_HEIGHT) + UnityEngine.Random.value;
-    // float random = (iteration ? rand.Next(MAX_SUBTRACT_HEIGHT, 0) : rand.Next(0, MAX_ADD_HEIGHT));
-    // iteration = !iteration;
-    float random = INITIAL_HEIGHT_ADDITION + UnityEngine.Random.value;
-    baseHeight += random * 2.0f * range - range;
-    // baseHeight += random;
-    INITIAL_HEIGHT_ADDITION /= 2.0f;
-    // INITIAL_HEIGHT_ADDITION /= rand.Next()
-    INITIAL_HEIGHT_ADDITION += (float)rand.Next(MAX_SUBTRACT_HEIGHT, MAX_ADD_HEIGHT);
-    // INITIAL_HEIGHT_ADDITION += (iteration ? rand.Next((int) MAX_SUBTRACT_HEIGHT, 0) : rand.Next(0, (int) MAX_ADD_HEIGHT));
-    // iteration = !iteration;
-
-    // baseHeight += random * 2.0f * range * ((float)(Math.Cos((x - OFFSET) * 0.05f) * Math.Cos((y - OFFSET) * 0.05f))) - range;
-    return baseHeight;
+    return baseHeight + HeightVariance * (float)(rand.NextDouble() * 2.0f - 1.0f);
   }
   void DiamondSquare()
   {
@@ -164,9 +144,9 @@ public class TerrainGeneratorScript : MonoBehaviour
     for (int size = dimension - 1; size > 1; size /= 2)
     {
       reach /= 2;
-      range = roughness * size * 0.05f;
       this.diamondStep(reach, size);
       this.squareStep(reach, size);
+      HeightVariance /= 2.0f;
     }
   }
 
@@ -188,7 +168,7 @@ public class TerrainGeneratorScript : MonoBehaviour
           }
         }
         // Debug.Log(String.Format("Assigning ({0}, {1}), size: {2}, reach: {3}", x, y, size, reach));
-        this.assignHeight(x, y, this.generateHeight(curSum / numOfCorners, x, y));
+        this.assignHeight(x, y, this.generateHeight(curSum / numOfCorners));
       }
     }
   }
@@ -213,7 +193,7 @@ public class TerrainGeneratorScript : MonoBehaviour
           }
         }
         // Debug.Log(String.Format("Assigning ({0}, {1}), size: {2}, reach: {3}", x, y, size, reach));
-        this.assignHeight(x, y, this.generateHeight(curSum / numOfCorners, x, y));
+        this.assignHeight(x, y, this.generateHeight(curSum / numOfCorners));
       }
       even = !even;
     }
