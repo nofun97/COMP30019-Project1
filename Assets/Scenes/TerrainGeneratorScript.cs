@@ -52,7 +52,7 @@ public class TerrainGeneratorScript : MonoBehaviour
     for (int i = 0; i < mesh.vertices.Length; i++)
       triangles[i] = i;
     mesh.triangles = this.triangles;
-    Vector3[] normals = this.generateNormals();
+    mesh.normals = this.generateNormals();
     this.gameObject.GetComponent<MeshFilter>().mesh = mesh;
   }
 
@@ -63,11 +63,11 @@ public class TerrainGeneratorScript : MonoBehaviour
     for (int i = 0; i < vertices.Length; i += 6)
     {
       Vector3 side1, side2, diagonal, cross1, cross2;
-      side1 = vertices[i + 1] - vertices[i];
-      side2 = vertices[i + 5] - vertices[i];
-      diagonal = vertices[i + 2] - vertices[i];
-      cross1 = Vector3.Cross(side1, diagonal);
-      cross2 = Vector3.Cross(diagonal, side2);
+      side1 = (vertices[i + 1] - vertices[i]).normalized;
+      side2 = (vertices[i + 5] - vertices[i]).normalized;
+      diagonal = (vertices[i + 2] - vertices[i]).normalized;
+      cross1 = Vector3.Cross(side1, diagonal).normalized;
+      cross2 = Vector3.Cross(diagonal, side2).normalized;
 
       for (int j = 0; j < 6; j++)
       {
@@ -149,11 +149,12 @@ public class TerrainGeneratorScript : MonoBehaviour
     float random = INITIAL_HEIGHT_ADDITION + UnityEngine.Random.value;
     baseHeight += random * 2.0f * range - range;
     // baseHeight += random;
-    INITIAL_HEIGHT_ADDITION /= 1.5f;
-    INITIAL_HEIGHT_ADDITION += (float) rand.Next(MAX_SUBTRACT_HEIGHT, MAX_ADD_HEIGHT);
+    INITIAL_HEIGHT_ADDITION /= 2.0f;
+    // INITIAL_HEIGHT_ADDITION /= rand.Next()
+    INITIAL_HEIGHT_ADDITION += (float)rand.Next(MAX_SUBTRACT_HEIGHT, MAX_ADD_HEIGHT);
     // INITIAL_HEIGHT_ADDITION += (iteration ? rand.Next((int) MAX_SUBTRACT_HEIGHT, 0) : rand.Next(0, (int) MAX_ADD_HEIGHT));
     // iteration = !iteration;
-    
+
     // baseHeight += random * 2.0f * range * ((float)(Math.Cos((x - OFFSET) * 0.05f) * Math.Cos((y - OFFSET) * 0.05f))) - range;
     return baseHeight;
   }

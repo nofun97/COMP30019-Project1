@@ -33,9 +33,9 @@ Shader "Unlit/PhongShader"
 		_PointLightPosition("Point Light Position", Vector) = (0.0, 0.0, 0.0)
 		_MinimumMountainHeight("Minimum Mountain Height", Float) = 10.0
 		_MaxSeaLevel("Max Sea Level", Float) = 5.0
-		_AmbientReflectionConstant("Ambient Reflection Constant", Float) = 1.0
-		_SpecularReflectivity("Specular Reflectivity", Float) = 0.75
-		_DiffuseReflectivity("Diffuse Reflectivity", Float) = 1.0
+		_AmbientReflectionConstant("Ambient Reflection Constant", Range(0.0, 1.0)) = 1.0
+		_SpecularReflectivity("Specular Reflectivity", Range(0.0, 1.0)) = 0.75
+		_DiffuseReflectivity("Diffuse Reflectivity", Range(0.0, 1.0)) = 1.0
 		_HighlightsTightness("Highlights Tightness", Float) = 1.0
 		_AttenuationFactor("Attenuation Factor", Float) = 1.0
 		_PeakColor("Peak Color", Color) = (1.0, 1.0, 1.0, 1.0)
@@ -124,7 +124,7 @@ Shader "Unlit/PhongShader"
 				// (when calculating the reflected ray in our specular component)
 				float fAtt = _AttenuationFactor;
 				float Kd = _DiffuseReflectivity;
-				float3 L = normalize(v.worldVertex.xyz - _PointLightPosition);
+				float3 L = normalize(_PointLightPosition - v.worldVertex.xyz);
 				float LdotN = dot(L, interpNormal);
 				float3 dif = fAtt * _PointLightColor.rgb * Kd * v.color.rgb * saturate(LdotN);
 

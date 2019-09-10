@@ -87,8 +87,10 @@ Material:
     - _Metallic: 0
     - _MinimumMountainHeight: 15
     - _Mode: 0
+    - _MountainHeight: 5
     - _OcclusionStrength: 1
     - _Parallax: 0.02
+    - _SeaLevel: 5
     - _SmoothnessTextureChannel: 0
     - _SoftParticlesEnabled: 0
     - _SoftParticlesFarFadeDistance: 1
