@@ -132,6 +132,8 @@ GameObject:
   - component: {fileID: 51454523}
   - component: {fileID: 51454522}
   - component: {fileID: 51454525}
+  - component: {fileID: 51454526}
+  - component: {fileID: 51454527}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -198,7 +200,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 51454521}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: -10}
+  m_LocalPosition: {x: 1.31, y: 5.97, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -219,6 +221,36 @@ MonoBehaviour:
   cameraSpeed: 20
   yawSpeed: 500
   pitchSpeed: 500
+--- !u!64 &51454526
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 51454521}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Convex: 1
+  m_CookingOptions: 14
+  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!54 &51454527
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 51454521}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 1
 --- !u!1 &117153328
 GameObject:
   m_ObjectHideFlags: 0
@@ -254,11 +286,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   pointLight: {fileID: 892703800}
   dimension: 65
-  MAX_ADD_HEIGHT: 10
-  MAX_SUBTRACT_HEIGHT: -15
   STEP: 1
-  INITIAL_HEIGHT_ADDITION: 25
-  roughness: 0.25
+  HeightVariance: 30
 --- !u!64 &117153330
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -270,9 +299,9 @@ MeshCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Convex: 0
+  m_Convex: 1
   m_CookingOptions: 14
-  m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
+  m_Mesh: {fileID: 0}
 --- !u!23 &117153331
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -356,6 +385,7 @@ GameObject:
   - component: {fileID: 575080327}
   - component: {fileID: 575080326}
   - component: {fileID: 575080330}
+  - component: {fileID: 575080331}
   m_Layer: 4
   m_Name: Water
   m_TagString: Untagged
@@ -374,9 +404,9 @@ MeshCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Convex: 0
+  m_Convex: 1
   m_CookingOptions: 14
-  m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
+  m_Mesh: {fileID: 0}
 --- !u!23 &575080327
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -448,6 +478,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de85ed33d028a504ca83ae3103b3de12, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!54 &575080331
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 575080325}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &892703795
 GameObject:
   m_ObjectHideFlags: 0
