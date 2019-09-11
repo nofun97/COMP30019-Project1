@@ -45,7 +45,7 @@ public class CameraControl : MonoBehaviour
         Cursor.lockState = cursorMode;
 
         // Retrieve the camera's RigidBody
-        cameraBody = this.gameObject.GetComponent<Rigidbody>();
+        // cameraBody = this.gameObject.GetComponent<Rigidbody>();
     }
 
     // Update is called once per frame
@@ -59,16 +59,20 @@ public class CameraControl : MonoBehaviour
         if (Time.time > safeguard) {
             // Move the camera based on its direction using the WASD keys, including diagonal movements
             if (Input.GetAxisRaw("Horizontal") >= 0) {
-                this.transform.position = transform.position + Camera.main.transform.right * cameraSpeed * Time.deltaTime;
+                gameObject.GetComponent<CharacterController>().Move(Camera.main.transform.right * cameraSpeed * Time.deltaTime);
+                // this.transform.position = transform.position + Camera.main.transform.right * cameraSpeed * Time.deltaTime;
             }
             if (Input.GetAxisRaw("Horizontal") <= 0) {
-                this.transform.position = transform.position - Camera.main.transform.right * cameraSpeed * Time.deltaTime;
+                gameObject.GetComponent<CharacterController>().Move(-Camera.main.transform.right * cameraSpeed * Time.deltaTime);
+                // this.transform.position = transform.position - Camera.main.transform.right * cameraSpeed * Time.deltaTime;
             }
             if (Input.GetAxisRaw("Vertical") >= 0) {
-                this.transform.position = transform.position + Camera.main.transform.forward * cameraSpeed * Time.deltaTime;
+                gameObject.GetComponent<CharacterController>().Move(Camera.main.transform.forward * cameraSpeed * Time.deltaTime);
+                // this.transform.position = transform.position + Camera.main.transform.forward * cameraSpeed * Time.deltaTime;
             }
             if (Input.GetAxisRaw("Vertical") <= 0) {
-                this.transform.position = transform.position - Camera.main.transform.forward * cameraSpeed * Time.deltaTime;
+                gameObject.GetComponent<CharacterController>().Move(-Camera.main.transform.forward * cameraSpeed * Time.deltaTime);
+                // this.transform.position = transform.position - Camera.main.transform.forward * cameraSpeed * Time.deltaTime;
             }
 
             // Check if camera goes off-limit and revert its position if it does
@@ -83,27 +87,27 @@ public class CameraControl : MonoBehaviour
     
     /* Override the default Rigidbody behaviour to ignore collision physics, otherwise the camera will be pushed away by physical forces 
     This portion (line 86-118) is taken but modified from "https://forum.unity.com/threads/ignore-force-from-certain-rigidbodies.505973/" */
-    void FixedUpdate()
-    {
-        if (!isColliding)
-        {
-            position = cameraBody.position;
-            rotation = cameraBody.rotation;
-            velocity = cameraBody.velocity;
-            angularVelocity = cameraBody.angularVelocity;
-        }
-    }
+    // void FixedUpdate()
+    // {
+    //     if (!isColliding)
+    //     {
+    //         position = cameraBody.position;
+    //         rotation = cameraBody.rotation;
+    //         velocity = cameraBody.velocity;
+    //         angularVelocity = cameraBody.angularVelocity;
+    //     }
+    // }
  
-    void LateUpdate()
-    {
-        if (isColliding)
-        {
-            cameraBody.position = position;
-            cameraBody.rotation = rotation;
-            cameraBody.velocity = velocity;
-            cameraBody.angularVelocity = angularVelocity;
-        }
-    }
+    // void LateUpdate()
+    // {
+    //     if (isColliding)
+    //     {
+    //         cameraBody.position = position;
+    //         cameraBody.rotation = rotation;
+    //         cameraBody.velocity = velocity;
+    //         cameraBody.angularVelocity = angularVelocity;
+    //     }
+    // }
 
     // If camera's rigidbody collides with another collider
     void OnCollisionEnter(Collision collision)
