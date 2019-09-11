@@ -221,6 +221,11 @@ MonoBehaviour:
   cameraSpeed: 20
   yawSpeed: 500
   pitchSpeed: 500
+  position: {x: 0, y: 0, z: 0}
+  velocity: {x: 0, y: 0, z: 0}
+  angularVelocity: {x: 0, y: 0, z: 0}
+  rotation: {x: 0, y: 0, z: 0, w: 0}
+  isColliding: 0
 --- !u!64 &51454526
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -234,7 +239,7 @@ MeshCollider:
   serializedVersion: 3
   m_Convex: 1
   m_CookingOptions: 14
-  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+  m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!54 &51454527
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -243,14 +248,14 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 51454521}
   serializedVersion: 2
-  m_Mass: 1
+  m_Mass: 0.0000001
   m_Drag: 0
   m_AngularDrag: 0
   m_UseGravity: 0
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 1
+  m_CollisionDetection: 0
 --- !u!1 &117153328
 GameObject:
   m_ObjectHideFlags: 0
@@ -262,7 +267,6 @@ GameObject:
   - component: {fileID: 117153333}
   - component: {fileID: 117153332}
   - component: {fileID: 117153331}
-  - component: {fileID: 117153330}
   - component: {fileID: 117153334}
   - component: {fileID: 117153329}
   m_Layer: 0
@@ -288,20 +292,6 @@ MonoBehaviour:
   dimension: 65
   STEP: 1
   HeightVariance: 30
---- !u!64 &117153330
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 117153328}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Convex: 1
-  m_CookingOptions: 14
-  m_Mesh: {fileID: 0}
 --- !u!23 &117153331
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -385,7 +375,6 @@ GameObject:
   - component: {fileID: 575080327}
   - component: {fileID: 575080326}
   - component: {fileID: 575080330}
-  - component: {fileID: 575080331}
   m_Layer: 4
   m_Name: Water
   m_TagString: Untagged
@@ -404,9 +393,9 @@ MeshCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Convex: 1
+  m_Convex: 0
   m_CookingOptions: 14
-  m_Mesh: {fileID: 0}
+  m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!23 &575080327
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -478,22 +467,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de85ed33d028a504ca83ae3103b3de12, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!54 &575080331
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 575080325}
-  serializedVersion: 2
-  m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0
-  m_UseGravity: 0
-  m_IsKinematic: 0
-  m_Interpolate: 0
-  m_Constraints: 0
-  m_CollisionDetection: 0
 --- !u!1 &892703795
 GameObject:
   m_ObjectHideFlags: 0
