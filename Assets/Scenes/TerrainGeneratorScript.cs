@@ -6,21 +6,25 @@ public class TerrainGeneratorScript : MonoBehaviour
 {
   public PointLight pointLight;
   private Vector3[] vertices;
+  private Vector3[] vectorArray;
   private int[] triangles;
   private int vectorCounts;
   public int dimension = 5;
   public float STEP = 0.5f;
   public float HeightVariance = 30;
   private int maxDimension, minDimension, OFFSET;
-  Vector3[] vectorArray;
   private System.Random rand;
-  
+
+  private const int POINTS_PER_BOX = 6;
   // Start is called before the first frame update
   void Start()
   {
+    System.Diagnostics.Stopwatch watch = System.Diagnostics.Stopwatch.StartNew();
     this.GenerateTerrainHeights();
     this.GenerateMesh();
     this.generateMeshCollider();
+    watch.Stop();
+    Debug.Log(watch.ElapsedMilliseconds);
   }
 
   void Update()
@@ -82,22 +86,29 @@ public class TerrainGeneratorScript : MonoBehaviour
 
   void GenerateVertices()
   {
-    // List<Vector3> verticesList = new List<Vector3>();
     this.vertices = new Vector3[(dimension - 1) * (dimension - 1) * 6];
     int index = 0;
     for (int y = 0; y < dimension - 1; y++)
     {
       for (int x = 0; x < dimension - 1; x++)
       {
-        var pivot = (x, y);
-        var top = (x, y + 1);
-        var right = (x + 1, y);
-        var diagonal = (x + 1, y + 1);
-        (int, int)[] order = new (int, int)[] { pivot, top, diagonal, pivot, diagonal, right };
-        foreach ((int vx, int vy) o in order)
-          this.vertices[index++] = this.getVertice(o.vx, o.vy);
+        this.vertices[index++] = this.getVertice(x, y);
+        this.vertices[index++] = this.getVertice(x, y + 1);
+        this.vertices[index++] = this.getVertice(x + 1, y + 1);
+        this.vertices[index++] = this.getVertice(x, y);
+        this.vertices[index++] = this.getVertice(x + 1, y + 1);
+        this.vertices[index++] = this.getVertice(x + 1, y);
+        // var pivot = (x, y);
+        // var top = (x, y + 1);
+        // var right = (x + 1, y);
+        // var diagonal = (x + 1, y + 1);
+        // (int, int)[] order = new (int, int)[] {pivot, top, diagonal, pivot, diagonal, right };
+        // foreach ((int vx, int vy) o in order)
+        //   this.vertices[index++] = this.getVertice(o.vx, o.vy);
+        
       }
     }
+    // this.vertices = this.vertices.Take((dimension - 1) * (dimension - 1) * 6).ToArray();
   }
 
   void GenerateTerrainHeights()
@@ -105,8 +116,7 @@ public class TerrainGeneratorScript : MonoBehaviour
     this.maxDimension = (int)(dimension / 2) + 1;
     this.minDimension = (int)(-dimension / 2);
     this.OFFSET = maxDimension - 1;
-    this.vectorCounts = dimension * dimension;
-    this.vectorArray = new Vector3[this.vectorCounts];
+    this.vectorArray = new Vector3[dimension * dimension];
     this.rand = new System.Random();
     this.CornerGenerator();
     this.DiamondSquare();
@@ -138,10 +148,14 @@ public class TerrainGeneratorScript : MonoBehaviour
     {
       reach /= 2;
       this.diamondStep(reach, size);
-      Debug.Log(watch.ElapsedMilliseconds);
+      watch.Stop();
+      Debug.Log(String.Format("Diamond {0}: {1:#,##0}", size, watch.ElapsedMilliseconds));
+      watch.Start();
       this.squareStep(reach, size);
-      Debug.Log(watch.ElapsedMilliseconds);
-      HeightVariance /= 2.0f;
+      watch.Stop();
+      Debug.Log(String.Format("Square {0}: {1:#,##0}", size, watch.ElapsedMilliseconds));
+      watch.Start();
+      HeightVariance *= 0.5f;
     }
   }
 
@@ -153,16 +167,22 @@ public class TerrainGeneratorScript : MonoBehaviour
       {
         float curSum = 0.0f;
         float numOfCorners = 0.0f;
-        (int, int)[] coordinates = this.getDiamondPattern(x, y, reach);
-        foreach ((int diamondX, int diamondY) c in coordinates)
-        {
-          if (this.IsWithinMap(c.diamondX, c.diamondY))
-          {
-            curSum += this.getVertice(c.diamondX, c.diamondY).y;
-            numOfCorners++;
-          }
+        if (this.IsWithinMap(x - reach, y - reach)){
+          curSum += this.getVertice(x - reach, y - reach).y;
+          numOfCorners++;
         }
-        // Debug.Log(String.Format("Assigning ({0}, {1}), size: {2}, reach: {3}", x, y, size, reach));
+        if (this.IsWithinMap(x + reach, y - reach)){
+          curSum += this.getVertice(x + reach, y - reach).y;
+          numOfCorners++;
+        }
+        if (this.IsWithinMap(x - reach, y + reach)){
+          curSum += this.getVertice(x - reach, y + reach).y;
+          numOfCorners++;
+        }
+        if (this.IsWithinMap(x + reach, y + reach)){
+          curSum += this.getVertice(x + reach, y + reach).y;
+          numOfCorners++;
+        }
         this.assignHeight(x, y, this.generateHeight(curSum / numOfCorners));
       }
     }
@@ -177,60 +197,47 @@ public class TerrainGeneratorScript : MonoBehaviour
       {
         float curSum = 0.0f;
         float numOfCorners = 0.0f;
-        (int, int)[] coordinates = this.getSquarePattern(x, y, reach);
-        foreach ((int squareX, int squareY) c in coordinates)
-        {
-          if (this.IsWithinMap(c.squareX, c.squareY))
-          {
-
-            curSum += this.getVertice(c.squareX, c.squareY).y;
-            numOfCorners++;
-          }
+        if (this.IsWithinMap(x - reach, y)){
+          curSum += this.getVertice(x - reach, y).y;
+          numOfCorners++;
         }
-        // Debug.Log(String.Format("Assigning ({0}, {1}), size: {2}, reach: {3}", x, y, size, reach));
+        if (this.IsWithinMap(x + reach, y)){
+          curSum += this.getVertice(x + reach, y).y;
+          numOfCorners++;
+        }
+        if (this.IsWithinMap(x, y + reach)){
+          curSum += this.getVertice(x, y + reach).y;
+          numOfCorners++;
+        }
+        if (this.IsWithinMap(x, y - reach)){
+          curSum += this.getVertice(x, y - reach).y;
+          numOfCorners++;
+        }
         this.assignHeight(x, y, this.generateHeight(curSum / numOfCorners));
       }
       even = !even;
     }
   }
 
-  (int, int)[] getDiamondPattern(int x, int y, int reach)
-  {
-    return new (int, int)[] { (x - reach, y - reach), (x + reach, y - reach), (x - reach, y + reach), (x + reach, y + reach) };
-  }
-
-  (int, int)[] getSquarePattern(int x, int y, int reach)
-  {
-    return new (int, int)[] { (x - reach, y), (x + reach, y), (x, y + reach), (x, y - reach) };
-  }
-
   void CornerGenerator()
   {
-    // this.assignHeight(0, 0, (float) rand.Next(15, 30));
-    this.assignHeight(0, 0, this.GenerateRandom());
-    this.assignHeight(0, dimension - 1, this.GenerateRandom());
-    this.assignHeight(dimension - 1, 0, this.GenerateRandom());
-    this.assignHeight(dimension - 1, dimension - 1, this.GenerateRandom());
-    // this.assignHeight(dimension - 1, dimension - 1, (float)rand.Next(-30, -15));
-  }
-
-  float GenerateRandom()
-  {
-    // return (this.rand.Next(-10, 0) + (float)this.rand.NextDouble());
-    // return rand.Next() % 5 < 1 ? this.rand.Next(MIN_HEIGHT, MAX_HEIGHT) + UnityEngine.Random.value : UnityEngine.Random.value;
-    return UnityEngine.Random.value;
+    this.assignHeight(0, 0, UnityEngine.Random.value);
+    this.assignHeight(0, dimension - 1, UnityEngine.Random.value);
+    this.assignHeight(dimension - 1, 0, UnityEngine.Random.value);
+    this.assignHeight(dimension - 1, dimension - 1, UnityEngine.Random.value);
   }
 
   Boolean IsWithinMap(int x, int y)
   {
-    return x >= 0 && x < dimension && y >= 0 && y < dimension;
+    return (y * dimension + x) >= 0 && (y * dimension + x) < dimension * dimension;
   }
-
 
   void assignHeight(int x, int y, float value)
   {
     // this.vectorArray[y][x] = new Vector3((x - this.OFFSET) * STEP, value, (y - this.OFFSET) * STEP);
-    this.vectorArray[y * dimension + x] = new Vector3((x - this.OFFSET) * STEP, value, (y - this.OFFSET) * STEP);
+    // this.vertices[(y * dimension + x) * POINTS_PER_BOX] = new Vector3((x -
+    // this.OFFSET) * STEP, value, (y - this.OFFSET) * STEP);
+    this.vectorArray[(y * dimension + x)] = new Vector3((x - this.OFFSET) * STEP, value, (y - this.OFFSET) * STEP);
   }
   
   // Create the MeshCollider based on the generated Mesh
@@ -241,12 +248,12 @@ public class TerrainGeneratorScript : MonoBehaviour
     meshc = this.gameObject.AddComponent<MeshCollider>();
 
     // Mesh Collider needs to be convex to allow for collision detection
-    meshc.convex = true;
+    meshc.convex = false;
     meshc.sharedMesh = meshf.mesh;
   }
 
   Vector3 getVertice(int x, int y)
   {
-    return this.vectorArray[y * dimension + x];
+    return this.vectorArray[(y * dimension + x)];
   }
 }
