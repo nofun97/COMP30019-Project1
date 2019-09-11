@@ -18,7 +18,11 @@ public class CameraControl : MonoBehaviour
     private float yawDegree = -10.0f;
     private float maxHeight = 55.0f;
     private int offset = 1;
+    public Vector3 position, velocity, angularVelocity;
+    public Quaternion rotation;
+    public bool isColliding;
     private int boundarySize;
+    Rigidbody cameraBody;
     GameObject plane;
     TerrainGeneratorScript terrainScript;
     CursorLockMode cursorMode;
@@ -26,7 +30,7 @@ public class CameraControl : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        // retrieve the dimensions of the plane to dynamically bound the camera later on
+        // Retrieve the dimensions of the plane to dynamically bound the camera later on
         plane = GameObject.Find("Plane");
         terrainScript = plane.GetComponent<TerrainGeneratorScript>();
         boundarySize = terrainScript.dimension/2 - offset;
@@ -39,62 +43,20 @@ public class CameraControl : MonoBehaviour
         to make it disappear again */
         cursorMode = CursorLockMode.Locked;
         Cursor.lockState = cursorMode;
-    }
 
-// check this code from unity website
-    Rigidbody rigidbody;
-    public Vector3 position, velocity, angularVelocity;
-    public Quaternion rotation;
-    public bool isColliding;
- 
-    void Awake()
-    {
-        rigidbody = GetComponent<Rigidbody>();
-    }
- 
-    void FixedUpdate()
-    {
-        if (!isColliding)
-        {
-            position = rigidbody.position;
-            rotation = rigidbody.rotation;
-            velocity = rigidbody.velocity;
-            angularVelocity = rigidbody.angularVelocity;
-        }
-    }
- 
-    void LateUpdate()
-    {
-        if (isColliding)
-        {
-            rigidbody.position = position;
-            rigidbody.rotation = rotation;
-            rigidbody.velocity = velocity;
-            rigidbody.angularVelocity = angularVelocity;
-        }
-    }
- 
-    void OnCollisionEnter(Collision collision)
-    {
-        if (collision.collider.tag == "Player")
-            isColliding = true;
-    }
- 
-    void OnCollisionExit(Collision collision)
-    {
-        if (collision.collider.tag == "Player")
-            isColliding = false;
+        // Retrieve the camera's RigidBody
+        cameraBody = this.gameObject.GetComponent<Rigidbody>();
     }
 
     // Update is called once per frame
     void Update()
     {
+        // Original position before applying transform, to revert camera upon collision
         Vector3 previousPosition = this.transform.position;
+
         /* Allow camera movement only after the scene has been fully rendered plus one second (safeguard) to prevent 
         accidentally displacing the initial camera position while the scene is still loading */
         if (Time.time > safeguard) {
-            BoundCamera(previousPosition);
-
             // Move the camera based on its direction using the WASD keys, including diagonal movements
             if (Input.GetAxisRaw("Horizontal") >= 0) {
                 this.transform.position = transform.position + Camera.main.transform.right * cameraSpeed * Time.deltaTime;
@@ -109,7 +71,7 @@ public class CameraControl : MonoBehaviour
                 this.transform.position = transform.position - Camera.main.transform.forward * cameraSpeed * Time.deltaTime;
             }
 
-            // Check if camera goes off-limit and reset its position if it does
+            // Check if camera goes off-limit and revert its position if it does
             BoundCamera(previousPosition);
 
             // Change the pitch and yaw of the camera based on the mouse movements
@@ -118,8 +80,44 @@ public class CameraControl : MonoBehaviour
             this.transform.eulerAngles = new Vector3(pitchDegree, yawDegree, 0.0f);
         }
     }
+    
+    /* Override the default Rigidbody behaviour to ignore collision physics, otherwise the camera will be pushed away by physical forces 
+    This portion (line 86-118) is taken but modified from "https://forum.unity.com/threads/ignore-force-from-certain-rigidbodies.505973/" */
+    void FixedUpdate()
+    {
+        if (!isColliding)
+        {
+            position = cameraBody.position;
+            rotation = cameraBody.rotation;
+            velocity = cameraBody.velocity;
+            angularVelocity = cameraBody.angularVelocity;
+        }
+    }
+ 
+    void LateUpdate()
+    {
+        if (isColliding)
+        {
+            cameraBody.position = position;
+            cameraBody.rotation = rotation;
+            cameraBody.velocity = velocity;
+            cameraBody.angularVelocity = angularVelocity;
+        }
+    }
 
-    // Bound the camera within the plane dimensions, through using "a postierori" collision detection
+    // If camera's rigidbody collides with another collider
+    void OnCollisionEnter(Collision collision)
+    {
+        isColliding = true;
+    }
+ 
+    // If camera's rigidbody does not collide with another collider
+    void OnCollisionExit(Collision collision)
+    {
+        isColliding = false;
+    }
+
+    // Bound the camera within the plane dimensions, using discrete collision detection
     void BoundCamera(Vector3 previousPosition)
     {
         // If the camera exceeds the plane dimensions or goes above the max height, revert its position

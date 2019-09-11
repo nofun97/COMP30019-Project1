@@ -7,7 +7,6 @@ public class TerrainGeneratorScript : MonoBehaviour
   public PointLight pointLight;
   private Vector3[] vertices;
   private int[] triangles;
-
   private int vectorCounts;
   public int dimension = 5;
   public float STEP = 0.5f;
@@ -15,10 +14,6 @@ public class TerrainGeneratorScript : MonoBehaviour
   private int maxDimension, minDimension, OFFSET;
   Vector3[] vectorArray;
   private System.Random rand;
-  // Used for detecting collisions in procedurally-generated mesh
-  Mesh mesh;
-  MeshFilter meshf;
-  MeshCollider meshc;
   
   // Start is called before the first frame update
   void Start()
@@ -240,8 +235,10 @@ public class TerrainGeneratorScript : MonoBehaviour
   
   // Create the MeshCollider based on the generated Mesh
   void generateMeshCollider () {
+    MeshFilter meshf;
+    MeshCollider meshc;
     meshf = this.gameObject.GetComponent<MeshFilter>();
-    meshc = this.gameObject.AddComponent<MeshCollider>() as MeshCollider;
+    meshc = this.gameObject.AddComponent<MeshCollider>();
 
     // Mesh Collider needs to be convex to allow for collision detection
     meshc.convex = true;
