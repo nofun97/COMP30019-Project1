@@ -56,22 +56,41 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
+    - _AmbientReflectionConstant: 1
+    - _Amount: 1
+    - _Amplitude: 1
+    - _AttenuationFactor: 1
     - _BumpScale: 1
     - _Cutoff: 0.5
+    - _CutoutThresh: 0.18
     - _DetailNormalMapScale: 1
+    - _DiffuseReflectivity: 0.5
+    - _Distance: 1
     - _DstBlend: 0
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
+    - _HighlightsTightness: 1
+    - _MaxSeaLevel: 5
     - _Metallic: 0
+    - _MinimumMountainHeight: 10
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
+    - _SpecularReflectivity: 0.5
+    - _Speed: 1
     - _SrcBlend: 1
+    - _Transparency: 0.45
     - _UVSec: 0
     - _ZWrite: 1
     m_Colors:
     - _Color: {r: 0, g: 0.7411765, b: 1, a: 0.75686276}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _GroundColor: {r: 1, g: 1, b: 1, a: 1}
+    - _PeakColor: {r: 1, g: 1, b: 1, a: 1}
+    - _PointLightColor: {r: 0, g: 0, b: 0, a: 1}
+    - _PointLightPosition: {r: 0, g: 0, b: 0, a: 1}
+    - _SeaFloorColor: {r: 0, g: 1, b: 0.99030876, a: 0.3764706}
+    - _TintColor: {r: 0, g: 0.8054733, b: 1, a: 1}
