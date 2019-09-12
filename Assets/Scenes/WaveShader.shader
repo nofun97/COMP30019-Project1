@@ -6,10 +6,15 @@ Shader "Custom/WaveShader"
 {
     Properties
     {
+			/*
+			 * code adapted from
+			 * https://learn.unity.com/tutorial/writing-your-first-shader-in-unity#5c7f8528edbc2a002053b570
+			 */
 			_MainTex ("Albedo Texture", 2D) = "white" {}
 			_TintColor("Tint Color", Color) = (0.0, 1.0, 0.99, 0.37)
 			_Transparency("Transparency", Range(0.0,0.5)) = 0.25
 			_CutoutThresh("Cutout Threshold", Range(0.0,1.0)) = 0.2
+
 			_PointLightColor("Point Light Color", Color) =(0, 0, 0)
 			_PointLightPosition("Point Light Position", Vector) = (0.0, 0.0, 0.0)
 			_AmbientReflectionConstant("Ambient Reflection Constant", Range(0.0, 1.0)) = 1.0
@@ -20,6 +25,10 @@ Shader "Custom/WaveShader"
     }
     SubShader
     {
+			/*
+			 * code adapted from
+			 * https://learn.unity.com/tutorial/writing-your-first-shader-in-unity#5c7f8528edbc2a002053b570
+			 */
 			Tags {"Queue"="Transparent" "RenderType"="Transparent" }
 			LOD 100
 
@@ -34,11 +43,16 @@ Shader "Custom/WaveShader"
 
 				#include "UnityCG.cginc"
 
+				/*
+				 * code adapted from
+				 * https://learn.unity.com/tutorial/writing-your-first-shader-in-unity#5c7f8528edbc2a002053b570
+				 */
 				uniform sampler2D _MainTex;
 				float4 _MainTex_ST;
 				float4 _TintColor;
 				float _Transparency;
 				float _CutoutThresh;
+
 				uniform float3 _PointLightColor;
 				uniform float3 _PointLightPosition;
 				float _AmbientReflectionConstant;
@@ -71,9 +85,13 @@ Shader "Custom/WaveShader"
 					v.vertex += displacement;
 
 					vertOut o;
+					/*
+					 * code adapted from
+					 * https://learn.unity.com/tutorial/writing-your-first-shader-in-unity#5c7f8528edbc2a002053b570
+					 */
 					o.vertex = UnityObjectToClipPos(v.vertex);
-					o.uv = v.uv;
-					// o.color = float4(0.0f, 1.0f, 0.99f, 0.37f);
+					o.uv = TRANSFORM_TEX(v.uv, _MainTex);
+
 					o.worldVertex = mul(unity_ObjectToWorld, v.vertex);
 					o.worldNormal = normalize(mul(transpose((float3x3)unity_WorldToObject), float3(0.0, 1.0, 0.0)));
 					return o;
@@ -82,6 +100,10 @@ Shader "Custom/WaveShader"
 				// Implementation of the fragment shader
 				fixed4 frag(vertOut v) : SV_Target
 				{
+					/*
+					 * code adapted from
+					 * https://learn.unity.com/tutorial/writing-your-first-shader-in-unity#5c7f8528edbc2a002053b570
+					 */
 					fixed4 col = tex2D(_MainTex, v.uv) + _TintColor;
 					col.a = _Transparency;
 					clip(col.r - _CutoutThresh);
