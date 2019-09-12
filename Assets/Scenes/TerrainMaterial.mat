@@ -85,7 +85,7 @@ Material:
     - _LightingEnabled: 1
     - _MaxSeaLevel: 0
     - _Metallic: 0
-    - _MinimumMountainHeight: 0
+    - _MinimumMountainHeight: 5
     - _Mode: 0
     - _MountainHeight: 5
     - _OcclusionStrength: 1
