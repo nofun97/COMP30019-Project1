@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-/* Defines the point light */
+// Defines the point light
 public class PointLight : MonoBehaviour {
 
     public Color color;
