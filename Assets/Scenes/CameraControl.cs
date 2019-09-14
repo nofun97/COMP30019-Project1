@@ -17,10 +17,10 @@ public class CameraControl : MonoBehaviour
     private float pitchDegree = 60.0f;
     private float yawDegree = -10.0f;
     private float maxHeight = 55.0f;
+    private float minHeight = 2.0f;
     private int offset = 1;
     public Vector3 position, velocity, angularVelocity;
     public Quaternion rotation;
-    public bool isColliding;
     private int boundarySize;
     Rigidbody cameraBody;
     GameObject plane;
@@ -79,25 +79,13 @@ public class CameraControl : MonoBehaviour
         }
     }
 
-    // If camera's rigidbody collides with another collider
-    void OnCollisionEnter(Collision collision)
-    {
-        isColliding = true;
-    }
- 
-    // If camera's rigidbody does not collide with another collider
-    void OnCollisionExit(Collision collision)
-    {
-        isColliding = false;
-    }
-
     // Bound the camera within the plane dimensions, using discrete collision detection
     void BoundCamera(Vector3 previousPosition)
     {
         // If the camera exceeds the plane dimensions or goes above the max height, revert its position
         if (this.transform.position.x >= boundarySize || this.transform.position.x <= -boundarySize || 
         this.transform.position.z >= boundarySize || this.transform.position.z <= -boundarySize || 
-        this.transform.position.y >= maxHeight || this.transform.position.y <= -maxHeight) {
+        this.transform.position.y >= maxHeight || this.transform.position.y <= minHeight) {
             this.transform.position = previousPosition;
         }
     }
