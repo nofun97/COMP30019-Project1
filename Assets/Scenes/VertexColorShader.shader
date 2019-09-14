@@ -1,4 +1,4 @@
-﻿//UNITY_SHADER_NO_UPGRADE
+﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
 
 Shader "Unlit/VertexColorShader"
 {
@@ -6,8 +6,6 @@ Shader "Unlit/VertexColorShader"
 	{
 		Pass
 		{
-			//Cull Off
-
 			CGPROGRAM
 			#pragma vertex vert
 			#pragma fragment frag
@@ -30,7 +28,7 @@ Shader "Unlit/VertexColorShader"
 			vertOut vert(vertIn v)
 			{
 				vertOut o;
-				o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
+				o.vertex = UnityObjectToClipPos(v.vertex);
 				o.color = v.color;
 				return o;
 			}

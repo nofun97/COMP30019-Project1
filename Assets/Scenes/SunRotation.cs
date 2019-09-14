@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+// Defines the rotation of the sun
 public class SunRotation : MonoBehaviour
 {
   public float spinSpeed;

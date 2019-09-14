@@ -39,40 +39,34 @@ public class CameraControl : MonoBehaviour
         this.transform.eulerAngles = new Vector3(startingPitch, startingYaw, 0.0f);
         this.transform.position = new Vector3(positionX, positionY, positionZ);
         
-        /* Set the cursor to be invisible while playing. Press "ESC" to show the cursor again, and click the screen 
-        to make it disappear again */
+        // Set the cursor to be invisible while playing. Press "ESC" to show the cursor again, and click the screen 
+        // to make it disappear again 
         cursorMode = CursorLockMode.Locked;
         Cursor.lockState = cursorMode;
 
-        // Retrieve the camera's RigidBody
-        // cameraBody = this.gameObject.GetComponent<Rigidbody>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        // Original position before applying transform, to revert camera upon collision
+        // Original position before applying transform, to revert camera upon collision 
         Vector3 previousPosition = this.transform.position;
 
-        /* Allow camera movement only after the scene has been fully rendered plus one second (safeguard) to prevent 
-        accidentally displacing the initial camera position while the scene is still loading */
+        // Allow camera movement only after the scene has been fully rendered plus one second (safeguard) to prevent 
+        // accidentally displacing the initial camera position while the scene is still loading 
         if (Time.time > safeguard) {
-            // Move the camera based on its direction using the WASD keys, including diagonal movements
+            // Move the camera based on its direction using the WASD keys, including diagonal movements 
             if (Input.GetAxisRaw("Horizontal") >= 0) {
                 gameObject.GetComponent<CharacterController>().Move(Camera.main.transform.right * cameraSpeed * Time.deltaTime);
-                // this.transform.position = transform.position + Camera.main.transform.right * cameraSpeed * Time.deltaTime;
             }
             if (Input.GetAxisRaw("Horizontal") <= 0) {
                 gameObject.GetComponent<CharacterController>().Move(-Camera.main.transform.right * cameraSpeed * Time.deltaTime);
-                // this.transform.position = transform.position - Camera.main.transform.right * cameraSpeed * Time.deltaTime;
             }
             if (Input.GetAxisRaw("Vertical") >= 0) {
                 gameObject.GetComponent<CharacterController>().Move(Camera.main.transform.forward * cameraSpeed * Time.deltaTime);
-                // this.transform.position = transform.position + Camera.main.transform.forward * cameraSpeed * Time.deltaTime;
             }
             if (Input.GetAxisRaw("Vertical") <= 0) {
                 gameObject.GetComponent<CharacterController>().Move(-Camera.main.transform.forward * cameraSpeed * Time.deltaTime);
-                // this.transform.position = transform.position - Camera.main.transform.forward * cameraSpeed * Time.deltaTime;
             }
 
             // Check if camera goes off-limit and revert its position if it does
@@ -84,30 +78,6 @@ public class CameraControl : MonoBehaviour
             this.transform.eulerAngles = new Vector3(pitchDegree, yawDegree, 0.0f);
         }
     }
-    
-    /* Override the default Rigidbody behaviour to ignore collision physics, otherwise the camera will be pushed away by physical forces 
-    This portion (line 86-118) is taken but modified from "https://forum.unity.com/threads/ignore-force-from-certain-rigidbodies.505973/" */
-    // void FixedUpdate()
-    // {
-    //     if (!isColliding)
-    //     {
-    //         position = cameraBody.position;
-    //         rotation = cameraBody.rotation;
-    //         velocity = cameraBody.velocity;
-    //         angularVelocity = cameraBody.angularVelocity;
-    //     }
-    // }
- 
-    // void LateUpdate()
-    // {
-    //     if (isColliding)
-    //     {
-    //         cameraBody.position = position;
-    //         cameraBody.rotation = rotation;
-    //         cameraBody.velocity = velocity;
-    //         cameraBody.angularVelocity = angularVelocity;
-    //     }
-    // }
 
     // If camera's rigidbody collides with another collider
     void OnCollisionEnter(Collision collision)
