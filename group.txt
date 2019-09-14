@@ -1,0 +1,14 @@
+psetiawan
+Implemented camera movements and the corresponding bounding area
+Implemented collision detection between camera and mountains
+
+nallanadi
+Implemented the bulk of the Diamond Square Algorithm
+Implemented normal calculation for illumination
+Managed several bug fixes from other functionalities
+Made water transparent
+
+manggana
+Helped in the initial understanding and implementation of the Diamond Square Algorithm
+Implemented the water plane and the sun as a orbiting point light source
+Tested program and wrote up appropriate documentation
