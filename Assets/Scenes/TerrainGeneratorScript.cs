@@ -4,36 +4,34 @@ using System.Collections.Generic;
 
 public class TerrainGeneratorScript : MonoBehaviour
 {
-  /// <value> To store light data </value>
+  // To store light data
   public PointLight pointLight;
 
-  /// <value> dimension of the plane </value>
+  // dimension of the plane
   public int dimension = 5;
 
-  /// <value> the horizontal distance of each points </value>
+  // the horizontal distance of each points
   public float STEP = 1.0f;
 
-  /// <value> the variance of height that is added to the average height </value>
+  // the variance of height that is added to the average height
   public float HeightVariance = 30;
 
-  /// <value> store vertices for mesh </value>
+  // store vertices for mesh
   private Vector3[] vertices;
 
-  /// <value> store the arrays of vectors for the plane </value>
+  // store the arrays of vectors for the plane
   private Vector3[] vectorArray;
 
-  /// <value> offset for each point so that plane is generated in the middle </value>
+  // offset for each point so that plane is generated in the middle
   private int OFFSET;
 
-  /// <value> for each grid, there are 6 points needed to be defined </value>
+  // for each grid, there are 6 points needed to be defined
   private const int POINTS_PER_GRID = 6;
 
-  /// <value> random number generator </value>
+  // random number generator
   private System.Random rand;
 
-  /// <summary>
-  /// Start is called before the first frame update
-  /// </summary>
+  // Start is called before the first frame update
   void Start()
   {
     this.generateTerrainHeights();
@@ -41,9 +39,7 @@ public class TerrainGeneratorScript : MonoBehaviour
     this.generateMeshCollider();
   }
 
-  /// <summary>
-  /// Update is called for every frame
-  /// </summary>
+  // Update is called for every frame
   void Update()
   {
     // Get renderer component (in order to pass params to shader)
@@ -54,9 +50,9 @@ public class TerrainGeneratorScript : MonoBehaviour
     renderer.material.SetVector("_PointLightPosition", this.pointLight.GetWorldPosition());
   }
 
-  /// <summary>
-  /// generateMesh generates mesh info and assigns it to the game object mesh
-  /// </summary>
+  /**
+   * generateMesh generates mesh info and assigns it to the game object mesh
+   */
   void generateMesh()
   {
     Mesh mesh = new Mesh();
@@ -79,12 +75,10 @@ public class TerrainGeneratorScript : MonoBehaviour
     this.gameObject.GetComponent<MeshFilter>().mesh = mesh;
   }
 
-  /// <summary>
-  /// generate normals based on the generated vertices
-  /// </summary>
-  /// <returns>
-  /// the generated normals
-  /// </returns>
+  /**
+   * generate normals based on the generated vertices and returns a list
+   * of normals for the mesh
+   */
   Vector3[] generateNormals(int length)
   {
     // record the normals for each vertice
@@ -133,9 +127,9 @@ public class TerrainGeneratorScript : MonoBehaviour
     return normals;
   }
 
-  /// <summary>
-  /// generateVertices assign the vertices in the appropriate location
-  /// </summary>
+  /**
+   * generateVertices assign the vertices in the appropriate location
+   */
   void generateVertices()
   {
     // number of vertices is calculated by calculating number of grids and multiplied by POINTS_PER_GRID
@@ -158,10 +152,10 @@ public class TerrainGeneratorScript : MonoBehaviour
     }
   }
 
-  /// <summary>
-  /// generateTerrainHeights is the function to initialize value before running
-  /// the diamond square algorithm
-  /// </summary>
+  /**
+   * generateTerrainHeights is the function to initialize value before running
+   * the diamond square algorithm
+   */
   void generateTerrainHeights()
   {
     this.OFFSET = (int)(dimension / 2);
@@ -171,18 +165,19 @@ public class TerrainGeneratorScript : MonoBehaviour
     this.diamondSquare();
   }
 
-  /// <summary>
-  /// generateHeight adds the random number to the average height
-  /// </summary>
+  /**
+   * generateHeight adds the random number to the average height and returns
+   * the height to assign at a point
+   */
   float generateHeight(float baseHeight)
   {
     // the height variance is multiplied by value between [-1, 1] for randomization
     return baseHeight + HeightVariance * (float)(rand.NextDouble() * 2.0f - 1.0f);
   }
 
-  /// <summary>
-  /// diamondSquare runs the diamond square algorithm
-  /// </summary>
+  /**
+   * diamondSquare runs the diamond square algorithm
+   */
   void diamondSquare()
   {
     // the distance of points to reach from a point
@@ -200,9 +195,9 @@ public class TerrainGeneratorScript : MonoBehaviour
     }
   }
 
-  /// <summary>
-  /// diamondStep runs the diamond step of the diamond square algorithm
-  /// </summary>
+  /**
+   * diamondStep runs the diamond step of the diamond square algorithm
+   */
   void diamondStep(int reach, int size)
   {
     // iterate through each diamond points for each segment
@@ -237,9 +232,9 @@ public class TerrainGeneratorScript : MonoBehaviour
     }
   }
 
-  /// <summary>
-  /// squareStep runs the square step of the diamond square algorithm
-  /// </summary>
+  /**
+   * squareStep runs the square step of the diamond square algorithm
+   */
   void squareStep(int reach, int size)
   {
     // iterate through each square points for each segment
@@ -276,9 +271,9 @@ public class TerrainGeneratorScript : MonoBehaviour
     }
   }
 
-  /// <summary>
-  /// cornerGenerator generates random values between 0 to 1 for each corner
-  /// </summary>
+  /**
+   * cornerGenerator generates random values between 0 to 1 for each corner
+   */
   void cornerGenerator()
   {
     /**
@@ -291,20 +286,18 @@ public class TerrainGeneratorScript : MonoBehaviour
     this.assignVertice(dimension - 1, dimension - 1, UnityEngine.Random.value);
   }
 
-  /// <summary>
-  /// isWithinArray checks if a index is within array
-  /// </summary>
-  /// <returns>
-  /// returns true if value is within array and false otherwise
-  /// </returns>
+  /**
+   * isWithinArray checks if a index is within array
+   * returns true if value is within array and false otherwise
+   */
   Boolean isWithinArray(int x, int y)
   {
     return (y * dimension + x) >= 0 && (y * dimension + x) < dimension * dimension;
   }
 
-  /// <summary>
-  /// assignVertice adds the vector to the corresponding index in the vectorArray
-  /// </summary>
+  /**
+   * assignVertice adds the vector to the corresponding index in the vectorArray
+   */
   void assignVertice(int x, int y, float value)
   {
     /**
@@ -314,20 +307,17 @@ public class TerrainGeneratorScript : MonoBehaviour
     this.vectorArray[(y * dimension + x)] = new Vector3((x - this.OFFSET) * STEP, value, (y - this.OFFSET) * STEP);
   }
 
-  /// <summary>
-  /// getVertice gets the vector in an index
-  /// </summary>
-  /// <returns>
-  /// returns the vector in that index
-  /// </returns>
+  /**
+   * getVertice gets the vector in an index and returns the vector in that index
+   */
   Vector3 getVertice(int x, int y)
   {
     return this.vectorArray[(y * dimension + x)];
   }
 
-  /// <summary>
-  /// Create the MeshCollider based on the generated Mesh
-  /// </summary>
+  /**
+   * Create the MeshCollider based on the generated Mesh
+   */
   void generateMeshCollider()
   {
     MeshFilter meshf;
