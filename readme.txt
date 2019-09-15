@@ -11,12 +11,15 @@ each step needs is halved (both are Initially n / 2) and the variance is halved.
 all arrays are filled.
 
 Camera Motion:
-The flight simulator style moving camera was implemented such that the 'w', 'a', 's', 'd' keys can only
-move the camera within a certain bounded box. The camera also cannot clip into the mountains or the surface
-of the water. This was achieved using collision detection. Collision detection is achieved by add mesh
-collisions component to the terrain and water, and character controller component to the camera with the
-appropriate radius so that camera can not look inside the terrain or water. The mouse can freely control
-the pitch and yaw of the camera.
+The flight simulator style moving camera was implemented such that the 'w', 'a', 's', 'd' keys correspond to the
+forward, left, backward and right direction respectively, and the camera can only be moved within a certain bounded box.
+The bounding is achieved by reverting the camera to its previous position whenever it attempts to go out of bounds.
+The camera also cannot clip into the mountains or the surface of the water. This was achieved using collision detection,
+via Unity's CharacterController and MeshCollider components. Initially, only MeshCollider components were used, but it was 
+limited to collision between convex meshes, which makes collisions inaccurate. Therefore, accurate collision detection is 
+achieved by adding MeshCollider component to the terrain and water, and CharacterController component to the camera with the 
+appropriate mesh, to keep it from looking inside the terrain or water. Finally, The mouse can freely control the pitch and 
+yaw of the camera.
 
 Surface Properties:
 A mesh is generated for the terrain, and the colour of each polygon is determined by its height. To allow
